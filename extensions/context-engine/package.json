@@ -1,0 +1,83 @@
+{
+  "name": "context-engine",
+  "displayName": "Miaoda Context Engine",
+  "description": "Intelligent context discovery and recommendation",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.context.smartSearch",
+        "title": "Smart Context Search",
+        "category": "Miaoda",
+        "icon": "$(search)"
+      },
+      {
+        "command": "miaoda.context.semanticSearch",
+        "title": "Semantic Code Search",
+        "category": "Miaoda",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "miaoda.context.analyzeDependencies",
+        "title": "Analyze Dependencies",
+        "category": "Miaoda",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "miaoda.context.showStats",
+        "title": "Show Context Stats",
+        "category": "Miaoda",
+        "icon": "$(graph-line)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "miaoda.context.smartSearch",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f"
+      },
+      {
+        "command": "miaoda.context.semanticSearch",
+        "key": "ctrl+alt+f",
+        "mac": "cmd+alt+f"
+      }
+    ],
+    "configuration": {
+      "title": "Miaoda Context Engine",
+      "properties": {
+        "miaoda.context.autoIndex": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically index workspace on startup"
+        },
+        "miaoda.context.maxResults": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum number of search results"
+        },
+        "miaoda.context.minConfidence": {
+          "type": "number",
+          "default": 0.5,
+          "description": "Minimum confidence threshold (0-1)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

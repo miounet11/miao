@@ -1,0 +1,94 @@
+{
+	"nameShort": "Miaoda",
+	"nameLong": "Miaoda IDE",
+	"applicationName": "miaoda",
+	"dataFolderName": ".miaoda",
+	"win32MutexName": "miaoda",
+	"licenseName": "MIT",
+	"licenseUrl": "https://github.com/miaoda/miaoda-ide/blob/main/LICENSE.txt",
+	"serverLicenseUrl": "https://github.com/miaoda/miaoda-ide/blob/main/LICENSE.txt",
+	"serverGreeting": [],
+	"serverLicense": [],
+	"serverLicensePrompt": "",
+	"serverApplicationName": "miaoda-server",
+	"serverDataFolderName": ".miaoda-server",
+	"tunnelApplicationName": "miaoda-tunnel",
+	"win32DirName": "Miaoda",
+	"win32NameVersion": "Miaoda IDE",
+	"win32RegValueName": "Miaoda",
+	"win32x64AppId": "{{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}",
+	"win32arm64AppId": "{{B2C3D4E5-F6A7-8901-BCDE-F12345678901}",
+	"win32x64UserAppId": "{{C3D4E5F6-A7B8-9012-CDEF-123456789012}",
+	"win32arm64UserAppId": "{{D4E5F6A7-B8C9-0123-DEF1-234567890123}",
+	"win32AppUserModelId": "Miaoda.IDE",
+	"win32ShellNameShort": "&Miaoda",
+	"win32TunnelServiceMutex": "miaoda-tunnelservice",
+	"win32TunnelMutex": "miaoda-tunnel",
+	"darwinBundleIdentifier": "com.miaoda.ide",
+	"linuxIconName": "miaoda",
+	"licenseFileName": "LICENSE.txt",
+	"reportIssueUrl": "https://github.com/miaoda/miaoda-ide/issues/new",
+	"nodejsRepository": "https://nodejs.org",
+	"urlProtocol": "miaoda",
+	"extensionsGallery": {
+		"serviceUrl": "https://open-vsx.org/vscode/gallery",
+		"itemUrl": "https://open-vsx.org/vscode/item"
+	},
+	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",
+	"extensionAllowedProposedApi": [
+		"miaoda-language-pack-zh-hans",
+		"miaoda-language-pack-ja",
+		"miaoda-language-pack-en",
+		"miaoda-welcome"
+	],
+	"builtInExtensions": [
+		{
+			"name": "ms-vscode.js-debug-companion",
+			"version": "1.1.2",
+			"sha256": "e034b8b41beb4e97e02c70f7175bd88abe66048374c2bd629f54bb33354bc2aa",
+			"repo": "https://github.com/microsoft/vscode-js-debug-companion",
+			"metadata": {
+				"id": "99cb0b7f-7354-4278-b8da-6cc79972169d",
+				"publisherId": {
+					"publisherId": "5f5636e7-69ed-4afe-b5d6-8d231fb3d3ee",
+					"publisherName": "ms-vscode",
+					"displayName": "Microsoft",
+					"flags": "verified"
+				},
+				"publisherDisplayName": "Microsoft"
+			}
+		},
+		{
+			"name": "ms-vscode.js-debug",
+			"version": "1.85.0",
+			"sha256": "85a97d373a6f92359f5db7bfc5a2fa6c5763b22c6ad07c962dfe32c84a079f3b",
+			"repo": "https://github.com/microsoft/vscode-js-debug",
+			"metadata": {
+				"id": "25629058-ddac-4e17-abba-74678e126c5d",
+				"publisherId": {
+					"publisherId": "5f5636e7-69ed-4afe-b5d6-8d231fb3d3ee",
+					"publisherName": "ms-vscode",
+					"displayName": "Microsoft",
+					"flags": "verified"
+				},
+				"publisherDisplayName": "Microsoft"
+			}
+		},
+		{
+			"name": "ms-vscode.vscode-js-profile-table",
+			"version": "1.0.8",
+			"sha256": "ca30069e21fbf576b49638ff8ff7c316b028c2faca924c23526737c65b8762bf",
+			"repo": "https://github.com/microsoft/vscode-js-profile-visualizer",
+			"metadata": {
+				"id": "7e52b41b-71ad-457b-ab7e-0620f1fc4feb",
+				"publisherId": {
+					"publisherId": "5f5636e7-69ed-4afe-b5d6-8d231fb3d3ee",
+					"publisherName": "ms-vscode",
+					"displayName": "Microsoft",
+					"flags": "verified"
+				},
+				"publisherDisplayName": "Microsoft"
+			}
+		}
+	]
+}

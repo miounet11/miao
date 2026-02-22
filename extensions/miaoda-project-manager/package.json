@@ -1,0 +1,114 @@
+{
+  "name": "miaoda-project-manager",
+  "displayName": "Miaoda Project Manager",
+  "description": "Intelligent project management system with file tracking, history, and session management",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.project.dashboard",
+        "title": "Show Project Dashboard",
+        "category": "Miaoda",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "miaoda.project.history",
+        "title": "View Project History",
+        "category": "Miaoda",
+        "icon": "$(history)"
+      },
+      {
+        "command": "miaoda.project.optimize",
+        "title": "Optimize Project Storage",
+        "category": "Miaoda",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "miaoda.project.settings",
+        "title": "Advanced Settings",
+        "category": "Miaoda",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "miaoda.history.refresh",
+        "title": "Refresh History",
+        "category": "Miaoda",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "miaoda.history.viewAIOperation",
+        "title": "View AI Operation Details",
+        "category": "Miaoda"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "miaoda-project",
+          "title": "Miaoda Project",
+          "icon": "$(folder-library)"
+        }
+      ]
+    },
+    "views": {
+      "miaoda-project": [
+        {
+          "type": "webview",
+          "id": "miaoda.projectDashboard",
+          "name": "Dashboard"
+        },
+        {
+          "id": "miaodaHistory",
+          "name": "History"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Miaoda Project Manager",
+      "properties": {
+        "miaoda.project.autoInit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically initialize .miaoda/ directory"
+        },
+        "miaoda.project.trackChanges": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically track file changes"
+        },
+        "miaoda.project.autoCompress": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically compress old data"
+        },
+        "miaoda.project.compressionThreshold": {
+          "type": "number",
+          "default": 2048,
+          "description": "Auto-compress when size exceeds (MB)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "node ./out/__tests__/runTests.js",
+    "pretest": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.3",
+    "mocha": "^10.0.0",
+    "@vscode/test-electron": "^2.3.0"
+  },
+  "dependencies": {}
+}

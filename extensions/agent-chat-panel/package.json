@@ -1,0 +1,99 @@
+{
+  "name": "agent-chat-panel",
+  "displayName": "Agent Chat Panel",
+  "description": "AI-powered chat interface for natural language development",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.chat.open",
+        "title": "Open Chat Panel",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.chat.clear",
+        "title": "Clear Chat History",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.chat.new",
+        "title": "New Chat Session",
+        "category": "Miaoda",
+        "icon": "$(add)"
+      },
+      {
+        "command": "miaoda.chat.loadHistory",
+        "title": "Load Chat History",
+        "category": "Miaoda",
+        "icon": "$(history)"
+      },
+      {
+        "command": "miaoda.chat.searchHistory",
+        "title": "Search Chat History",
+        "category": "Miaoda",
+        "icon": "$(search)"
+      },
+      {
+        "command": "miaoda.chat.deleteSession",
+        "title": "Delete Chat Session",
+        "category": "Miaoda",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "miaoda.chat.exportSession",
+        "title": "Export Chat Session",
+        "category": "Miaoda",
+        "icon": "$(export)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "miaoda-chat",
+          "title": "Miaoda Chat",
+          "icon": "resources/chat-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "miaoda-chat": [
+        {
+          "type": "webview",
+          "id": "miaoda.chatPanel",
+          "name": "Chat"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "npm run compile:extension && npm run compile:webview",
+    "compile:extension": "tsc -p ./",
+    "compile:webview": "webpack --mode production",
+    "watch": "npm run watch:extension & npm run watch:webview",
+    "watch:extension": "tsc -watch -p ./",
+    "watch:webview": "webpack --mode development --watch"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/vscode": "^1.85.0",
+    "css-loader": "^6.7.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "style-loader": "^3.3.2",
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.3.3",
+    "webpack": "^5.77.0",
+    "webpack-cli": "^5.0.1"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  }
+}

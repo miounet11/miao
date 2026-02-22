@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./extensions/shared-services" },
+    { "path": "./extensions/agent-chat-panel" },
+    { "path": "./extensions/agent-orchestrator" },
+    { "path": "./extensions/skills-manager" },
+    { "path": "./extensions/browser-bridge" }
+  ]
+}

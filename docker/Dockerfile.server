@@ -1,0 +1,59 @@
+# Miaoda Server - Backend Service Dockerfile
+# Lightweight Node.js backend for cloud services
+
+FROM node:18-alpine AS builder
+
+WORKDIR /build
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++ git
+
+# Copy package files
+COPY package.json yarn.lock .yarnrc ./
+
+# Install dependencies
+RUN yarn install --frozen-lockfile --production=false --network-timeout 180000
+
+# Copy source code
+COPY . .
+
+# Compile TypeScript
+RUN yarn compile
+
+# Production stage
+FROM node:18-alpine
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    ca-certificates \
+    tini
+
+WORKDIR /app
+
+# Copy built artifacts
+COPY --from=builder /build/out ./out
+COPY --from=builder /build/node_modules ./node_modules
+COPY --from=builder /build/package.json ./
+COPY --from=builder /build/product.json ./
+
+# Create data directory for SQLite database
+RUN mkdir -p /data && chown -R node:node /data
+
+# Use non-root user
+USER node
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV DATABASE_PATH=/data/miaoda.db
+ENV PORT=3000
+
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+# Use tini for proper signal handling
+ENTRYPOINT ["/sbin/tini", "--"]
+
+CMD ["node", "./out/vs/server/node/server.main.js"]

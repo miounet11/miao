@@ -1,0 +1,149 @@
+{
+  "name": "miaoda-remote-ssh",
+  "displayName": "Miaoda Remote - SSH",
+  "description": "SSH remote development for Miaoda IDE",
+  "version": "1.0.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:miaoda.remote.addNewSSHHost",
+    "onCommand:miaoda.remote.connectToHost",
+    "onCommand:miaoda.remote.openSSHConfig",
+    "onCommand:miaoda.remote.disconnect",
+    "onView:miaoda.remote.sshTargets"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.remote.addNewSSHHost",
+        "title": "Add New SSH Host",
+        "category": "Remote-SSH",
+        "icon": "$(add)"
+      },
+      {
+        "command": "miaoda.remote.connectToHost",
+        "title": "Connect to Host",
+        "category": "Remote-SSH",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "miaoda.remote.openSSHConfig",
+        "title": "Open SSH Configuration File",
+        "category": "Remote-SSH",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "miaoda.remote.disconnect",
+        "title": "Disconnect from Host",
+        "category": "Remote-SSH",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "miaoda.remote.refreshTargets",
+        "title": "Refresh SSH Targets",
+        "category": "Remote-SSH",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "miaoda.remote.openTerminal",
+        "title": "Open Remote Terminal",
+        "category": "Remote-SSH",
+        "icon": "$(terminal)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "miaoda-remote",
+          "title": "Remote Explorer",
+          "icon": "$(remote-explorer)"
+        }
+      ]
+    },
+    "views": {
+      "miaoda-remote": [
+        {
+          "id": "miaoda.remote.sshTargets",
+          "name": "SSH Targets"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "miaoda.remote.addNewSSHHost",
+          "when": "view == miaoda.remote.sshTargets",
+          "group": "navigation"
+        },
+        {
+          "command": "miaoda.remote.refreshTargets",
+          "when": "view == miaoda.remote.sshTargets",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "miaoda.remote.connectToHost",
+          "when": "view == miaoda.remote.sshTargets && viewItem == sshHost",
+          "group": "inline"
+        },
+        {
+          "command": "miaoda.remote.openTerminal",
+          "when": "view == miaoda.remote.sshTargets && viewItem == sshHost"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Remote - SSH",
+      "properties": {
+        "miaoda.remote.ssh.configFile": {
+          "type": "string",
+          "default": "~/.ssh/config",
+          "description": "Path to SSH config file"
+        },
+        "miaoda.remote.ssh.showLoginTerminal": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show terminal during SSH connection"
+        },
+        "miaoda.remote.ssh.enableDynamicForwarding": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable dynamic port forwarding"
+        },
+        "miaoda.remote.ssh.connectTimeout": {
+          "type": "number",
+          "default": 30000,
+          "description": "SSH connection timeout in milliseconds"
+        },
+        "miaoda.remote.ssh.keepaliveInterval": {
+          "type": "number",
+          "default": 30000,
+          "description": "SSH keepalive interval in milliseconds"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ./out/test/runTest.js"
+  },
+  "dependencies": {
+    "ssh2": "^1.15.0",
+    "ssh2-sftp-client": "^10.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/ssh2": "^1.15.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}

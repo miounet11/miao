@@ -1,0 +1,28 @@
+{
+  "name": "miaoda-language-pack-zh-hans",
+  "displayName": "中文（简体）语言包",
+  "description": "Miaoda IDE 中文简体语言包",
+  "version": "1.0.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Language Packs"
+  ],
+  "contributes": {
+    "localizations": [
+      {
+        "languageId": "zh-cn",
+        "languageName": "Chinese (Simplified)",
+        "localizedLanguageName": "中文（简体）",
+        "translations": [
+          {
+            "id": "vscode",
+            "path": "./translations/main.i18n.json"
+          }
+        ]
+      }
+    ]
+  }
+}

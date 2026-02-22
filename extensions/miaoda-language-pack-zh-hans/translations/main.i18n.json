@@ -1,0 +1,152 @@
+{
+  "version": "1.0.0",
+  "contents": {
+    "vs/workbench/browser/parts/editor/editorStatus": {
+      "activeEditorPosition": "第 {0} 行，第 {1} 列",
+      "tabFocusModeEnabled": "按 Tab 键将焦点移至下一个元素",
+      "screenReaderDetected": "已检测到屏幕阅读器",
+      "cursorPosition": "光标位置"
+    },
+    "vs/workbench/contrib/files/browser/fileActions": {
+      "newFile": "新建文件",
+      "newFolder": "新建文件夹",
+      "openFile": "打开文件",
+      "saveFile": "保存文件",
+      "saveAll": "全部保存",
+      "closeEditor": "关闭编辑器",
+      "closeAllEditors": "关闭所有编辑器",
+      "revertFile": "还原文件",
+      "compareWithSaved": "与已保存的文件比较",
+      "copyPath": "复制路径",
+      "copyRelativePath": "复制相对路径",
+      "revealInExplorer": "在资源管理器中显示",
+      "openContainingFolder": "打开包含的文件夹"
+    },
+    "vs/workbench/contrib/terminal/browser/terminal": {
+      "terminal": "终端",
+      "newTerminal": "新建终端",
+      "splitTerminal": "拆分终端",
+      "killTerminal": "终止终端",
+      "clearTerminal": "清除终端",
+      "scrollToTop": "滚动到顶部",
+      "scrollToBottom": "滚动到底部"
+    },
+    "vs/workbench/browser/parts/activitybar/activitybarPart": {
+      "explorer": "资源管理器",
+      "search": "搜索",
+      "sourceControl": "源代码管理",
+      "debug": "运行和调试",
+      "extensions": "扩展",
+      "accounts": "账户",
+      "settings": "设置"
+    },
+    "vs/workbench/browser/parts/editor/editorActions": {
+      "splitEditor": "拆分编辑器",
+      "splitEditorDown": "向下拆分编辑器",
+      "splitEditorRight": "向右拆分编辑器",
+      "closeEditor": "关闭编辑器",
+      "closeOtherEditors": "关闭其他编辑器",
+      "closeEditorsToTheRight": "关闭右侧编辑器",
+      "closeAllEditors": "关闭所有编辑器",
+      "keepEditor": "保持编辑器打开",
+      "pinEditor": "固定编辑器",
+      "unpinEditor": "取消固定编辑器"
+    },
+    "vs/workbench/contrib/search/browser/searchView": {
+      "search": "搜索",
+      "searchInFolder": "在文件夹中搜索",
+      "replaceInFiles": "在文件中替换",
+      "findInFiles": "在文件中查找",
+      "matchCase": "区分大小写",
+      "matchWholeWord": "全字匹配",
+      "useRegularExpression": "使用正则表达式",
+      "includeFiles": "要包含的文件",
+      "excludeFiles": "要排除的文件"
+    },
+    "vs/workbench/contrib/debug/browser/debugActions": {
+      "start": "开始调试",
+      "stop": "停止调试",
+      "restart": "重启调试",
+      "pause": "暂停",
+      "continue": "继续",
+      "stepOver": "单步跳过",
+      "stepInto": "单步调试",
+      "stepOut": "单步跳出"
+    },
+    "vs/workbench/contrib/extensions/browser/extensionsActions": {
+      "installExtension": "安装扩展",
+      "uninstallExtension": "卸载扩展",
+      "enableExtension": "启用扩展",
+      "disableExtension": "禁用扩展",
+      "updateExtension": "更新扩展",
+      "showRecommendedExtensions": "显示推荐的扩展",
+      "showInstalledExtensions": "显示已安装的扩展"
+    },
+    "vs/workbench/browser/parts/views/viewPaneContainer": {
+      "collapse": "折叠",
+      "expand": "展开",
+      "close": "关闭",
+      "maximize": "最大化",
+      "restore": "还原"
+    },
+    "vs/editor/contrib/find/browser/findWidget": {
+      "find": "查找",
+      "replace": "替换",
+      "findNext": "查找下一个",
+      "findPrevious": "查找上一个",
+      "replaceOne": "替换",
+      "replaceAll": "全部替换",
+      "toggleReplace": "切换替换",
+      "matchCase": "区分大小写",
+      "matchWholeWord": "全字匹配",
+      "useRegularExpression": "使用正则表达式"
+    },
+    "vs/workbench/services/preferences/common/preferences": {
+      "openSettings": "打开设置",
+      "openKeyboardShortcuts": "打开键盘快捷方式",
+      "openUserSettings": "打开用户设置",
+      "openWorkspaceSettings": "打开工作区设置",
+      "configureLanguage": "配置显示语言"
+    },
+    "vs/platform/actions/browser/menuEntryActionViewItem": {
+      "titleAndKb": "{0} ({1})"
+    },
+    "vs/workbench/browser/parts/statusbar/statusbarPart": {
+      "status": "状态栏"
+    },
+    "vs/workbench/contrib/output/common/output": {
+      "output": "输出",
+      "clearOutput": "清除输出",
+      "showOutput": "显示输出"
+    },
+    "vs/workbench/contrib/problems/browser/problemsView": {
+      "problems": "问题",
+      "noProblems": "未检测到工作区中的问题",
+      "showErrors": "显示错误",
+      "showWarnings": "显示警告",
+      "showInfos": "显示信息"
+    },
+    "vs/workbench/contrib/markers/browser/markers": {
+      "errors": "错误",
+      "warnings": "警告",
+      "infos": "信息"
+    },
+    "vs/workbench/services/editor/common/editorService": {
+      "openEditor": "打开编辑器",
+      "closeEditor": "关闭编辑器"
+    },
+    "vs/platform/quickinput/browser/commandsQuickAccess": {
+      "recentlyUsed": "最近使用",
+      "otherCommands": "其他命令"
+    },
+    "vs/workbench/contrib/files/browser/views/explorerViewer": {
+      "open": "打开",
+      "openToSide": "在侧边打开",
+      "rename": "重命名",
+      "delete": "删除",
+      "cut": "剪切",
+      "copy": "复制",
+      "paste": "粘贴"
+    }
+  }
+}

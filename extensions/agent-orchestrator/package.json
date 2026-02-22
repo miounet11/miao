@@ -1,0 +1,209 @@
+{
+  "name": "agent-orchestrator",
+  "displayName": "Agent Orchestrator",
+  "description": "Multi-agent coordination and task orchestration",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.orchestrator.createPlan",
+        "title": "Create Execution Plan",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.orchestrator.executePlan",
+        "title": "Execute Plan",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.skill.generate",
+        "title": "Generate Skill",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.skill.learnFromCode",
+        "title": "Learn Skill from Code",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.showTaskOutput",
+        "title": "Show Task Output",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.submitBatchTasks",
+        "title": "Submit Batch Tasks",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.showAgentVisualization",
+        "title": "Show Agent Visualization",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.showSpeedComparison",
+        "title": "Show Speed Comparison",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.startAgentTeam",
+        "title": "Start Agent Team",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.showQuickActions",
+        "title": "Show Quick Actions",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.executeSkill",
+        "title": "Execute Skill",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.searchSkills",
+        "title": "Search Skills",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.trendingSkills",
+        "title": "Trending Skills",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.selectModel",
+        "title": "Select AI Model",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.addApiKey",
+        "title": "Add API Key",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.listModels",
+        "title": "List Models",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.showQuotaDetails",
+        "title": "Show Quota Details",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.smartCommit",
+        "title": "Smart Commit",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.codeReview",
+        "title": "Code Review",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.writeTests",
+        "title": "Write Tests",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.planFeature",
+        "title": "Plan Feature",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.debugIssue",
+        "title": "Debug Issue",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.brainstorm",
+        "title": "Brainstorm",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.verifyCode",
+        "title": "Verify Code",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.generateDocs",
+        "title": "Generate Documentation",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.parallelExecute",
+        "title": "Parallel Execute",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.showAgentPoolStats",
+        "title": "Show Agent Pool Stats",
+        "category": "Miaoda"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "miaoda.skill.generate",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s"
+      },
+      {
+        "command": "miaoda.skill.learnFromCode",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l"
+      },
+      {
+        "command": "miaoda.showTaskOutput",
+        "key": "ctrl+shift+o",
+        "mac": "cmd+shift+o"
+      },
+      {
+        "command": "miaoda.startAgentTeam",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a"
+      },
+      {
+        "command": "miaoda.showQuickActions",
+        "key": "ctrl+shift+q",
+        "mac": "cmd+shift+q"
+      },
+      {
+        "command": "miaoda.executeSkill",
+        "key": "ctrl+shift+k",
+        "mac": "cmd+shift+k"
+      },
+      {
+        "command": "miaoda.codeReview",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r"
+      }
+    ],
+    "terminal": {
+      "profiles": [
+        {
+          "id": "miaoda.terminal",
+          "title": "Miaoda Terminal",
+          "icon": "sparkle"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  }
+}

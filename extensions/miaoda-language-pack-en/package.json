@@ -1,0 +1,23 @@
+{
+  "name": "miaoda-language-pack-en",
+  "displayName": "English Language Pack",
+  "description": "English Language Pack for Miaoda IDE",
+  "version": "1.0.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Language Packs"
+  ],
+  "contributes": {
+    "localizations": [
+      {
+        "languageId": "en",
+        "languageName": "English",
+        "localizedLanguageName": "English",
+        "translations": []
+      }
+    ]
+  }
+}

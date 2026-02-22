@@ -1,0 +1,73 @@
+{
+  "name": "theme-miaoda",
+  "displayName": "Miaoda Theme",
+  "description": "Next-generation IDE theme inspired by Cursor",
+  "version": "1.0.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "themes": [
+      {
+        "label": "Miaoda Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/miaoda-dark.json"
+      },
+      {
+        "label": "Miaoda Light",
+        "uiTheme": "vs",
+        "path": "./themes/miaoda-light.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "miaoda.applyCustomStyles",
+        "title": "Miaoda: Apply Custom Styles",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.showThemeInfo",
+        "title": "Miaoda: Show Theme Info",
+        "category": "Miaoda"
+      }
+    ],
+    "configuration": {
+      "title": "Miaoda Theme",
+      "properties": {
+        "miaoda.autoApplyCustomStyles": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically apply custom styles on startup"
+        },
+        "miaoda.customStyles": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable custom CSS styles (requires restart)"
+        }
+      }
+    }
+  },
+  "icon": "../../resources/branding/icon.png",
+  "keywords": [
+    "theme",
+    "dark",
+    "light",
+    "cursor",
+    "modern",
+    "gradient",
+    "next-gen"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/miaoda/miaoda-ide"
+  },
+  "license": "MIT"
+}

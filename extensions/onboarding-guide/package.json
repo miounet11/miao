@@ -1,0 +1,70 @@
+{
+  "name": "onboarding-guide",
+  "displayName": "Miaoda Onboarding Guide",
+  "description": "Progressive onboarding with 7-day growth plan",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.onboarding.start",
+        "title": "Start Onboarding",
+        "category": "Miaoda",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "miaoda.onboarding.showToday",
+        "title": "Show Today's Plan",
+        "category": "Miaoda",
+        "icon": "$(calendar)"
+      },
+      {
+        "command": "miaoda.onboarding.progress",
+        "title": "View Learning Progress",
+        "category": "Miaoda",
+        "icon": "$(graph-line)"
+      },
+      {
+        "command": "miaoda.onboarding.recommend",
+        "title": "Get Feature Recommendation",
+        "category": "Miaoda",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "miaoda.onboarding.achievements",
+        "title": "View Achievements",
+        "category": "Miaoda",
+        "icon": "$(trophy)"
+      },
+      {
+        "command": "miaoda.onboarding.help",
+        "title": "Contextual Help",
+        "category": "Miaoda",
+        "icon": "$(question)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "miaoda.onboarding.showToday",
+        "key": "ctrl+shift+h",
+        "mac": "cmd+shift+h"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

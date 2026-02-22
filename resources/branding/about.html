@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Miaoda IDE</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #0066CC 0%, #7B3FF2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo h1 {
+            font-size: 48px;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        .logo .chinese {
+            font-size: 24px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        .tagline {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .info {
+            line-height: 1.8;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: 600;
+            opacity: 0.8;
+        }
+        .value {
+            text-align: right;
+        }
+        .developer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .developer-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .developer-location {
+            opacity: 0.8;
+        }
+        .links {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+        .links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>Miaoda IDE</h1>
+            <div class="chinese">妙搭</div>
+        </div>
+
+        <div class="tagline">
+            Universal LLM Integration - Your Way<br>
+            通用 LLM 集成 - 随心所欲
+        </div>
+
+        <div class="info">
+            <div class="info-row">
+                <span class="label">Version</span>
+                <span class="value">0.1.0</span>
+            </div>
+            <div class="info-row">
+                <span class="label">License</span>
+                <span class="value">MIT</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Based on</span>
+                <span class="value">VS Code OSS</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Core Feature</span>
+                <span class="value">Universal LLM Support</span>
+            </div>
+        </div>
+
+        <div class="developer">
+            <div class="developer-name">Developed by Coco</div>
+            <div class="developer-location">来自中国 🇨🇳</div>
+        </div>
+
+        <div class="links">
+            <a href="https://github.com/miaoda/miaoda-ide" target="_blank">GitHub</a>
+            <a href="https://docs.miaoda.dev" target="_blank">Documentation</a>
+            <a href="https://discord.gg/miaoda" target="_blank">Community</a>
+        </div>
+    </div>
+</body>
+</html>

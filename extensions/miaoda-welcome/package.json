@@ -1,0 +1,46 @@
+{
+  "name": "miaoda-welcome",
+  "displayName": "Miaoda Welcome",
+  "description": "Welcome experience for Miaoda IDE with language selection",
+  "version": "1.0.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.welcome.showLanguageSelector",
+        "title": "Miaoda: Select Display Language",
+        "category": "Miaoda"
+      }
+    ],
+    "configuration": {
+      "title": "Miaoda Welcome",
+      "properties": {
+        "miaoda.welcome.languageSelected": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the user has selected a language"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.130",
+    "@types/vscode": "^1.109.0",
+    "typescript": "^5.9.3"
+  }
+}

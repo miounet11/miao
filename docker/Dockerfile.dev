@@ -1,0 +1,42 @@
+# Miaoda IDE - Development Environment
+# Hot-reload enabled development container
+
+FROM node:18-bullseye
+
+# Install development dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    pkg-config \
+    libx11-dev \
+    libxkbfile-dev \
+    libsecret-1-dev \
+    libkrb5-dev \
+    python3 \
+    git \
+    vim \
+    curl \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install global tools
+RUN npm install -g nodemon typescript
+
+WORKDIR /workspace
+
+# Copy package files
+COPY package.json yarn.lock .yarnrc ./
+
+# Install dependencies
+RUN yarn install --frozen-lockfile --network-timeout 180000
+
+# Copy source code
+COPY . .
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV VSCODE_DEV=1
+
+EXPOSE 8080 9229
+
+# Development command with watch mode
+CMD ["yarn", "watch"]

@@ -1,0 +1,57 @@
+{
+  "name": "browser-bridge",
+  "displayName": "Browser Bridge",
+  "description": "Browser automation capabilities powered by Playwright",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onCommand:miaoda.browser.launch"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.browser.launch",
+        "title": "Launch Browser",
+        "category": "Miaoda",
+        "icon": "$(browser)"
+      },
+      {
+        "command": "miaoda.browser.record",
+        "title": "Record Browser Actions",
+        "category": "Miaoda",
+        "icon": "$(record)"
+      },
+      {
+        "command": "miaoda.browser.screenshot",
+        "title": "Take Browser Screenshot",
+        "category": "Miaoda",
+        "icon": "$(device-camera)"
+      },
+      {
+        "command": "miaoda.browser.close",
+        "title": "Close Browser",
+        "category": "Miaoda",
+        "icon": "$(close)"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "jest"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.3"
+  }
+}

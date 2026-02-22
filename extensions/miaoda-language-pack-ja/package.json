@@ -1,0 +1,28 @@
+{
+  "name": "miaoda-language-pack-ja",
+  "displayName": "日本語言語パック",
+  "description": "Miaoda IDE 日本語言語パック",
+  "version": "1.0.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Language Packs"
+  ],
+  "contributes": {
+    "localizations": [
+      {
+        "languageId": "ja",
+        "languageName": "Japanese",
+        "localizedLanguageName": "日本語",
+        "translations": [
+          {
+            "id": "vscode",
+            "path": "./translations/main.i18n.json"
+          }
+        ]
+      }
+    ]
+  }
+}

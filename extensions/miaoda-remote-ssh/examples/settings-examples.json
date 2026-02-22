@@ -1,0 +1,110 @@
+{
+  "// Basic Configuration": "",
+  "miaoda.remote.ssh.configFile": "~/.ssh/config",
+  "miaoda.remote.ssh.showLoginTerminal": true,
+
+  "// Connection Settings": "",
+  "miaoda.remote.ssh.connectTimeout": 30000,
+  "miaoda.remote.ssh.keepaliveInterval": 30000,
+
+  "// Advanced Settings": "",
+  "miaoda.remote.ssh.enableDynamicForwarding": true,
+
+  "// Example: Increase timeout for slow connections": "",
+  "miaoda.remote.ssh.connectTimeout.slow": 60000,
+
+  "// Example: Faster keepalive for unstable connections": "",
+  "miaoda.remote.ssh.keepaliveInterval.unstable": 15000,
+
+  "// Example: Custom SSH config location": "",
+  "miaoda.remote.ssh.configFile.custom": "~/Documents/my-ssh-config",
+
+  "// Example: Disable login terminal": "",
+  "miaoda.remote.ssh.showLoginTerminal.disabled": false,
+
+  "// Port Forwarding (Planned Feature)": "",
+  "miaoda.remote.ssh.portForwarding": [
+    {
+      "name": "Web Server",
+      "local": 8080,
+      "remote": 80,
+      "host": "localhost"
+    },
+    {
+      "name": "Database",
+      "local": 5432,
+      "remote": 5432,
+      "host": "localhost"
+    }
+  ],
+
+  "// Recommended Settings for Different Scenarios": "",
+
+  "// Scenario 1: Fast, Stable Connection": "",
+  "miaoda.remote.ssh.scenario.fast": {
+    "connectTimeout": 10000,
+    "keepaliveInterval": 60000
+  },
+
+  "// Scenario 2: Slow, Unstable Connection": "",
+  "miaoda.remote.ssh.scenario.slow": {
+    "connectTimeout": 60000,
+    "keepaliveInterval": 15000
+  },
+
+  "// Scenario 3: Corporate Network with Proxy": "",
+  "miaoda.remote.ssh.scenario.corporate": {
+    "connectTimeout": 45000,
+    "keepaliveInterval": 30000,
+    "enableDynamicForwarding": false
+  },
+
+  "// Scenario 4: Development on Local Network": "",
+  "miaoda.remote.ssh.scenario.local": {
+    "connectTimeout": 5000,
+    "keepaliveInterval": 60000
+  },
+
+  "// Terminal Settings": "",
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontFamily": "'Fira Code', 'Courier New', monospace",
+
+  "// File Watcher Settings (for remote files)": "",
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.hg/store/**": true
+  },
+
+  "// Auto Save (useful for remote development)": "",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+
+  "// Editor Settings for Remote Development": "",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+
+  "// Git Settings for Remote Repositories": "",
+  "git.autofetch": true,
+  "git.confirmSync": false,
+
+  "// Search Settings (exclude large directories)": "",
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/.git": true,
+    "**/vendor": true,
+    "**/dist": true,
+    "**/build": true
+  },
+
+  "// Performance Settings": "",
+  "files.maxMemoryForLargeFilesMB": 4096,
+  "search.maxResults": 20000,
+
+  "// Security Settings": "",
+  "security.workspace.trust.enabled": true,
+  "security.workspace.trust.untrustedFiles": "prompt"
+}

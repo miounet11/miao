@@ -1,0 +1,115 @@
+{
+  "name": "cost-optimizer",
+  "displayName": "Miaoda Cost Optimizer",
+  "description": "Transparent cost prediction and optimization",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.cost.predict",
+        "title": "Predict Cost",
+        "category": "Miaoda",
+        "icon": "$(graph-line)"
+      },
+      {
+        "command": "miaoda.cost.smartSelect",
+        "title": "Smart Model Selection",
+        "category": "Miaoda",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "miaoda.cost.optimize",
+        "title": "Cost Optimization Suggestions",
+        "category": "Miaoda",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "miaoda.cost.dashboard",
+        "title": "Cost Dashboard",
+        "category": "Miaoda",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "miaoda.cost.enableCache",
+        "title": "Enable Query Cache",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.cost.autoSelectModel",
+        "title": "Enable Auto Model Selection",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.cost.enableBatch",
+        "title": "Enable Batch Processing",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.cost.optimizePrompts",
+        "title": "Enable Prompt Optimization",
+        "category": "Miaoda"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "miaoda.cost.dashboard",
+        "key": "ctrl+shift+$",
+        "mac": "cmd+shift+$"
+      }
+    ],
+    "configuration": {
+      "title": "Miaoda Cost Optimizer",
+      "properties": {
+        "miaoda.cost.cacheEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable query caching to reduce costs"
+        },
+        "miaoda.cost.autoSelectModel": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically select the most cost-effective model"
+        },
+        "miaoda.cost.batchEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable batch processing for small requests"
+        },
+        "miaoda.cost.promptOptimization": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically optimize prompt length"
+        },
+        "miaoda.cost.costConstraint": {
+          "type": "string",
+          "enum": ["strict", "moderate", "flexible"],
+          "default": "moderate",
+          "description": "Cost constraint level"
+        },
+        "miaoda.cost.latencyRequirement": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "default": "medium",
+          "description": "Latency requirement level"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

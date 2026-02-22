@@ -1,0 +1,46 @@
+{
+  "name": "skills-manager",
+  "displayName": "Skills Manager",
+  "description": "Create and manage custom skills for agent automation",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.skills.list",
+        "title": "List Skills",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.skills.execute",
+        "title": "Execute Skill",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.skills.register",
+        "title": "Register Skill",
+        "category": "Miaoda"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "node ./out/__tests__/runTests.js",
+    "pretest": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.3",
+    "mocha": "^10.0.0",
+    "@vscode/test-electron": "^2.3.0"
+  }
+}

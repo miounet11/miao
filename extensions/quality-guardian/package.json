@@ -1,0 +1,70 @@
+{
+  "name": "quality-guardian",
+  "displayName": "Miaoda Quality Guardian",
+  "description": "Multi-layer code quality checking and auto-fixing",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.quality.fullCheck",
+        "title": "Full Quality Check",
+        "category": "Miaoda",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "miaoda.quality.staticAnalysis",
+        "title": "Static Analysis",
+        "category": "Miaoda",
+        "icon": "$(search)"
+      },
+      {
+        "command": "miaoda.quality.aiReview",
+        "title": "AI Code Review",
+        "category": "Miaoda",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "miaoda.quality.autoFix",
+        "title": "Auto Fix Issues",
+        "category": "Miaoda",
+        "icon": "$(wrench)"
+      },
+      {
+        "command": "miaoda.quality.score",
+        "title": "Quality Score",
+        "category": "Miaoda",
+        "icon": "$(graph-line)"
+      },
+      {
+        "command": "miaoda.quality.trend",
+        "title": "Quality Trend",
+        "category": "Miaoda",
+        "icon": "$(graph)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "miaoda.quality.fullCheck",
+        "key": "ctrl+shift+q",
+        "mac": "cmd+shift+q"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

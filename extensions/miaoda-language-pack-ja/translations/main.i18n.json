@@ -1,0 +1,152 @@
+{
+  "version": "1.0.0",
+  "contents": {
+    "vs/workbench/browser/parts/editor/editorStatus": {
+      "activeEditorPosition": "{0} 行、{1} 列",
+      "tabFocusModeEnabled": "Tab キーで次の要素にフォーカスを移動します",
+      "screenReaderDetected": "スクリーン リーダーが検出されました",
+      "cursorPosition": "カーソル位置"
+    },
+    "vs/workbench/contrib/files/browser/fileActions": {
+      "newFile": "新しいファイル",
+      "newFolder": "新しいフォルダー",
+      "openFile": "ファイルを開く",
+      "saveFile": "ファイルを保存",
+      "saveAll": "すべて保存",
+      "closeEditor": "エディターを閉じる",
+      "closeAllEditors": "すべてのエディターを閉じる",
+      "revertFile": "ファイルを元に戻す",
+      "compareWithSaved": "保存済みと比較",
+      "copyPath": "パスのコピー",
+      "copyRelativePath": "相対パスのコピー",
+      "revealInExplorer": "エクスプローラーで表示",
+      "openContainingFolder": "含まれているフォルダーを開く"
+    },
+    "vs/workbench/contrib/terminal/browser/terminal": {
+      "terminal": "ターミナル",
+      "newTerminal": "新しいターミナル",
+      "splitTerminal": "ターミナルの分割",
+      "killTerminal": "ターミナルの強制終了",
+      "clearTerminal": "ターミナルのクリア",
+      "scrollToTop": "一番上にスクロール",
+      "scrollToBottom": "一番下にスクロール"
+    },
+    "vs/workbench/browser/parts/activitybar/activitybarPart": {
+      "explorer": "エクスプローラー",
+      "search": "検索",
+      "sourceControl": "ソース管理",
+      "debug": "実行とデバッグ",
+      "extensions": "拡張機能",
+      "accounts": "アカウント",
+      "settings": "設定"
+    },
+    "vs/workbench/browser/parts/editor/editorActions": {
+      "splitEditor": "エディターの分割",
+      "splitEditorDown": "エディターを下に分割",
+      "splitEditorRight": "エディターを右に分割",
+      "closeEditor": "エディターを閉じる",
+      "closeOtherEditors": "他のエディターを閉じる",
+      "closeEditorsToTheRight": "右側のエディターを閉じる",
+      "closeAllEditors": "すべてのエディターを閉じる",
+      "keepEditor": "エディターを開いたままにする",
+      "pinEditor": "エディターをピン留め",
+      "unpinEditor": "エディターのピン留めを外す"
+    },
+    "vs/workbench/contrib/search/browser/searchView": {
+      "search": "検索",
+      "searchInFolder": "フォルダー内を検索",
+      "replaceInFiles": "ファイル内を置換",
+      "findInFiles": "ファイル内を検索",
+      "matchCase": "大文字と小文字を区別する",
+      "matchWholeWord": "単語単位で検索する",
+      "useRegularExpression": "正規表現を使用する",
+      "includeFiles": "含めるファイル",
+      "excludeFiles": "除外するファイル"
+    },
+    "vs/workbench/contrib/debug/browser/debugActions": {
+      "start": "デバッグの開始",
+      "stop": "デバッグの停止",
+      "restart": "デバッグの再起動",
+      "pause": "一時停止",
+      "continue": "続行",
+      "stepOver": "ステップ オーバー",
+      "stepInto": "ステップ イン",
+      "stepOut": "ステップ アウト"
+    },
+    "vs/workbench/contrib/extensions/browser/extensionsActions": {
+      "installExtension": "拡張機能のインストール",
+      "uninstallExtension": "拡張機能のアンインストール",
+      "enableExtension": "拡張機能の有効化",
+      "disableExtension": "拡張機能の無効化",
+      "updateExtension": "拡張機能の更新",
+      "showRecommendedExtensions": "推奨される拡張機能を表示",
+      "showInstalledExtensions": "インストール済みの拡張機能を表示"
+    },
+    "vs/workbench/browser/parts/views/viewPaneContainer": {
+      "collapse": "折りたたむ",
+      "expand": "展開",
+      "close": "閉じる",
+      "maximize": "最大化",
+      "restore": "元に戻す"
+    },
+    "vs/editor/contrib/find/browser/findWidget": {
+      "find": "検索",
+      "replace": "置換",
+      "findNext": "次を検索",
+      "findPrevious": "前を検索",
+      "replaceOne": "置換",
+      "replaceAll": "すべて置換",
+      "toggleReplace": "置換の切り替え",
+      "matchCase": "大文字と小文字を区別する",
+      "matchWholeWord": "単語単位で検索する",
+      "useRegularExpression": "正規表現を使用する"
+    },
+    "vs/workbench/services/preferences/common/preferences": {
+      "openSettings": "設定を開く",
+      "openKeyboardShortcuts": "キーボード ショートカットを開く",
+      "openUserSettings": "ユーザー設定を開く",
+      "openWorkspaceSettings": "ワークスペース設定を開く",
+      "configureLanguage": "表示言語を構成する"
+    },
+    "vs/platform/actions/browser/menuEntryActionViewItem": {
+      "titleAndKb": "{0} ({1})"
+    },
+    "vs/workbench/browser/parts/statusbar/statusbarPart": {
+      "status": "ステータス バー"
+    },
+    "vs/workbench/contrib/output/common/output": {
+      "output": "出力",
+      "clearOutput": "出力のクリア",
+      "showOutput": "出力の表示"
+    },
+    "vs/workbench/contrib/problems/browser/problemsView": {
+      "problems": "問題",
+      "noProblems": "ワークスペースで問題は検出されませんでした",
+      "showErrors": "エラーを表示",
+      "showWarnings": "警告を表示",
+      "showInfos": "情報を表示"
+    },
+    "vs/workbench/contrib/markers/browser/markers": {
+      "errors": "エラー",
+      "warnings": "警告",
+      "infos": "情報"
+    },
+    "vs/workbench/services/editor/common/editorService": {
+      "openEditor": "エディターを開く",
+      "closeEditor": "エディターを閉じる"
+    },
+    "vs/platform/quickinput/browser/commandsQuickAccess": {
+      "recentlyUsed": "最近使用した項目",
+      "otherCommands": "その他のコマンド"
+    },
+    "vs/workbench/contrib/files/browser/views/explorerViewer": {
+      "open": "開く",
+      "openToSide": "横に並べて開く",
+      "rename": "名前の変更",
+      "delete": "削除",
+      "cut": "切り取り",
+      "copy": "コピー",
+      "paste": "貼り付け"
+    }
+  }
+}

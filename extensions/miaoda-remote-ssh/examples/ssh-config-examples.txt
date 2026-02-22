@@ -1,0 +1,215 @@
+# SSH Config Examples for Miaoda Remote SSH
+# Copy these examples to ~/.ssh/config and modify as needed
+
+# ============================================
+# Basic Configuration
+# ============================================
+
+# Simple server with password authentication
+Host simple-server
+  HostName 192.168.1.100
+  Port 22
+  User root
+
+# ============================================
+# Key-Based Authentication
+# ============================================
+
+# Server with SSH key
+Host key-server
+  HostName example.com
+  Port 22
+  User admin
+  IdentityFile ~/.ssh/id_rsa
+
+# Server with specific key and agent forwarding
+Host dev-server
+  HostName dev.example.com
+  Port 22
+  User developer
+  IdentityFile ~/.ssh/id_rsa_dev
+  ForwardAgent yes
+
+# ============================================
+# Custom Ports
+# ============================================
+
+# Server on non-standard port
+Host custom-port
+  HostName server.example.com
+  Port 2222
+  User admin
+  IdentityFile ~/.ssh/id_rsa
+
+# ============================================
+# Jump Hosts / Bastion
+# ============================================
+
+# Bastion host
+Host bastion
+  HostName bastion.example.com
+  Port 22
+  User jumpuser
+  IdentityFile ~/.ssh/id_rsa_bastion
+
+# Internal server via bastion
+Host internal
+  HostName 10.0.1.100
+  Port 22
+  User admin
+  ProxyJump bastion
+  IdentityFile ~/.ssh/id_rsa_internal
+
+# ============================================
+# Multiple Environments
+# ============================================
+
+# Development environment
+Host dev
+  HostName dev.myapp.com
+  Port 22
+  User developer
+  IdentityFile ~/.ssh/id_rsa_dev
+
+# Staging environment
+Host staging
+  HostName staging.myapp.com
+  Port 22
+  User developer
+  IdentityFile ~/.ssh/id_rsa_staging
+
+# Production environment
+Host prod
+  HostName prod.myapp.com
+  Port 22
+  User deploy
+  IdentityFile ~/.ssh/id_rsa_prod
+
+# ============================================
+# Cloud Providers
+# ============================================
+
+# AWS EC2 instance
+Host aws-web
+  HostName ec2-xx-xx-xx-xx.compute.amazonaws.com
+  Port 22
+  User ec2-user
+  IdentityFile ~/.ssh/aws-key.pem
+
+# DigitalOcean Droplet
+Host do-app
+  HostName 159.65.xxx.xxx
+  Port 22
+  User root
+  IdentityFile ~/.ssh/digitalocean
+
+# Google Cloud VM
+Host gcp-vm
+  HostName xx.xx.xx.xx
+  Port 22
+  User gcpuser
+  IdentityFile ~/.ssh/google_compute_engine
+
+# ============================================
+# Advanced Options
+# ============================================
+
+# Server with keepalive
+Host keepalive-server
+  HostName server.example.com
+  Port 22
+  User admin
+  IdentityFile ~/.ssh/id_rsa
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+
+# Server with compression (for slow connections)
+Host slow-connection
+  HostName remote.example.com
+  Port 22
+  User admin
+  IdentityFile ~/.ssh/id_rsa
+  Compression yes
+
+# Server with strict host key checking disabled (use with caution!)
+Host test-server
+  HostName test.local
+  Port 22
+  User testuser
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+
+# ============================================
+# Wildcard Configuration
+# ============================================
+
+# Apply to all hosts
+Host *
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+  TCPKeepAlive yes
+  Compression yes
+
+# Apply to all .example.com hosts
+Host *.example.com
+  User admin
+  IdentityFile ~/.ssh/id_rsa_company
+  ForwardAgent yes
+
+# ============================================
+# Docker Containers
+# ============================================
+
+# Docker container via SSH
+Host docker-container
+  HostName localhost
+  Port 2222
+  User root
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+
+# ============================================
+# Raspberry Pi
+# ============================================
+
+# Raspberry Pi
+Host raspi
+  HostName raspberrypi.local
+  Port 22
+  User pi
+  IdentityFile ~/.ssh/id_rsa_raspi
+
+# ============================================
+# GitHub / GitLab
+# ============================================
+
+# GitHub
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_rsa_github
+
+# GitLab
+Host gitlab.com
+  HostName gitlab.com
+  User git
+  IdentityFile ~/.ssh/id_rsa_gitlab
+
+# ============================================
+# Local Development
+# ============================================
+
+# Vagrant VM
+Host vagrant
+  HostName 127.0.0.1
+  Port 2222
+  User vagrant
+  IdentityFile ~/.vagrant.d/insecure_private_key
+  StrictHostKeyChecking no
+
+# WSL2 (Windows Subsystem for Linux)
+Host wsl
+  HostName localhost
+  Port 2222
+  User wsluser
+  IdentityFile ~/.ssh/id_rsa

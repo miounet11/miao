@@ -1,0 +1,62 @@
+# Miaoda IDE - Local Development Docker Compose
+version: '3.8'
+
+services:
+  miaoda-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.server
+    container_name: miaoda-server
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_PATH=/data/miaoda.db
+      - LOG_LEVEL=debug
+    volumes:
+      - miaoda-data:/data
+      - ../out:/app/out:ro
+    restart: unless-stopped
+    networks:
+      - miaoda-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  miaoda-ide:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ide
+    container_name: miaoda-ide
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - VSCODE_AGENT_FOLDER=/data
+    volumes:
+      - miaoda-workspace:/workspace
+      - miaoda-data:/data
+    restart: unless-stopped
+    networks:
+      - miaoda-network
+    depends_on:
+      - miaoda-server
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/healthz', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  miaoda-data:
+    driver: local
+  miaoda-workspace:
+    driver: local
+
+networks:
+  miaoda-network:
+    driver: bridge
