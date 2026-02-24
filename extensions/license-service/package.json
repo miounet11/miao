@@ -1,0 +1,57 @@
+{
+  "name": "license-service",
+  "displayName": "License Service",
+  "description": "License verification and management for Miaoda IDE",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.license.verify",
+        "title": "Verify License",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.license.showInfo",
+        "title": "Show License Info",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.license.manageDevices",
+        "title": "Manage Devices",
+        "category": "Miaoda"
+      }
+    ],
+    "configuration": {
+      "title": "Miaoda License",
+      "properties": {
+        "miaoda.license.apiBaseUrl": {
+          "type": "string",
+          "default": "https://api.miaoda.com",
+          "description": "Backend API base URL"
+        },
+        "miaoda.license.offlineGracePeriod": {
+          "type": "number",
+          "default": 72,
+          "description": "Offline grace period in hours"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

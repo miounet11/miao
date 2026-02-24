@@ -1,4 +1,4 @@
-import { getDatabase } from '../config/database';
+import { db } from '../config/database';
 
 export interface UserConfig {
   id: number;
@@ -22,59 +22,41 @@ export class UserConfigModel {
   /**
    * Save or update user configuration
    */
-  static upsert(userId: number, config: UserConfigData): UserConfig {
-    const db = getDatabase();
+  static async upsert(userId: number, config: UserConfigData): Promise<UserConfig> {
     const configJson = JSON.stringify(config);
-
-    // Check if config exists
-    const existing = this.findByUserId(userId);
-
-    if (existing) {
-      // Update existing config
-      const stmt = db.prepare(`
-        UPDATE user_configs
-        SET config_json = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE user_id = ?
-      `);
-      stmt.run(configJson, userId);
-      return this.findByUserId(userId)!;
-    } else {
-      // Insert new config
-      const stmt = db.prepare(`
-        INSERT INTO user_configs (user_id, config_json)
-        VALUES (?, ?)
-      `);
-      const result = stmt.run(userId, configJson);
-      return this.findById(result.lastInsertRowid as number)!;
-    }
+    const result = await db().query(
+      `INSERT INTO user_configs (user_id, config_json)
+       VALUES ($1, $2)
+       ON CONFLICT (user_id)
+       DO UPDATE SET config_json = $2, updated_at = CURRENT_TIMESTAMP
+       RETURNING *`,
+      [userId, configJson]
+    );
+    return result.rows[0] as UserConfig;
   }
 
   /**
    * Find user config by ID
    */
-  static findById(id: number): UserConfig | null {
-    const db = getDatabase();
-    const stmt = db.prepare('SELECT * FROM user_configs WHERE id = ?');
-    return stmt.get(id) as UserConfig | null;
+  static async findById(id: number): Promise<UserConfig | null> {
+    const result = await db().query('SELECT * FROM user_configs WHERE id = $1', [id]);
+    return result.rows[0] || null;
   }
 
   /**
    * Find user config by user ID
    */
-  static findByUserId(userId: number): UserConfig | null {
-    const db = getDatabase();
-    const stmt = db.prepare('SELECT * FROM user_configs WHERE user_id = ?');
-    return stmt.get(userId) as UserConfig | null;
+  static async findByUserId(userId: number): Promise<UserConfig | null> {
+    const result = await db().query('SELECT * FROM user_configs WHERE user_id = $1', [userId]);
+    return result.rows[0] || null;
   }
 
   /**
    * Delete user config
    */
-  static delete(userId: number): boolean {
-    const db = getDatabase();
-    const stmt = db.prepare('DELETE FROM user_configs WHERE user_id = ?');
-    const result = stmt.run(userId);
-    return result.changes > 0;
+  static async delete(userId: number): Promise<boolean> {
+    const result = await db().query('DELETE FROM user_configs WHERE user_id = $1', [userId]);
+    return result.rowCount > 0;
   }
 
   /**
@@ -91,8 +73,8 @@ export class UserConfigModel {
   /**
    * Get parsed config by user ID
    */
-  static getConfigData(userId: number): UserConfigData | null {
-    const userConfig = this.findByUserId(userId);
+  static async getConfigData(userId: number): Promise<UserConfigData | null> {
+    const userConfig = await this.findByUserId(userId);
     if (!userConfig) return null;
     return this.parseConfig(userConfig);
   }

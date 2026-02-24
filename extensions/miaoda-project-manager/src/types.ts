@@ -44,6 +44,9 @@ export interface SessionRecord {
 
 export interface StorageStats {
   totalSize: number;
+  totalSizeFormatted?: string;
+  fileCount?: number;
+  directoryCount?: number;
   historySize: number;
   contextSize: number;
   logsSize: number;

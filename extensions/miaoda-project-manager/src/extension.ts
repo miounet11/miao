@@ -3,6 +3,7 @@ import { ProjectManager } from './managers/ProjectManager';
 import { DashboardWebviewProvider } from './webview/DashboardWebviewProvider';
 import { HistoryWebviewProvider } from './webview/HistoryWebviewProvider';
 import { MiaodaHistoryTreeProvider } from './MiaodaHistoryTreeProvider';
+import { StorageAPIClient } from './api/StorageAPIClient';
 
 let projectManager: ProjectManager | null = null;
 let dashboardProvider: DashboardWebviewProvider | null = null;
@@ -32,6 +33,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Initialize webview providers
     dashboardProvider = new DashboardWebviewProvider(context.extensionUri, projectManager);
     historyProvider = new HistoryWebviewProvider(context.extensionUri, projectManager);
+
+    // Initialize Storage API client for remote server
+    const storageApiClient = new StorageAPIClient(context);
+    // 自动生成或使用已有 token
+    const existingToken = context.globalState.get<string>('cloudToken');
+    if (!existingToken) {
+      // 使用默认 token（生产环境应通过登录获取）
+      console.log('No cloud token found, storage API will require authentication');
+    }
+    // 注入 API 客户端到 StorageManager 和 DashboardProvider
+    projectManager.getStorageManager().setAPIClient(storageApiClient);
+    dashboardProvider.setAPIClient(storageApiClient);
 
     // Initialize history tree provider
     historyTreeProvider = new MiaodaHistoryTreeProvider(
@@ -146,7 +159,7 @@ async function handleDashboard(manager: ProjectManager): Promise<void> {
     const stats = await manager.getProjectStats();
     const storageStats = await manager.getStorageStats();
 
-    const content = `# 📊 Miaoda Project Dashboard\n\n## Project Statistics\n\n- **Total Files Modified**: ${stats.totalFiles}\n- **Total Changes**: ${stats.totalChanges}\n- **Active Time**: ${formatDuration(stats.activeTime)}\n- **Last Modified**: ${new Date(stats.lastModified).toLocaleString()}\n\n## Storage Usage\n\n- **Total Size**: ${formatBytes(storageStats.totalSize)}\n- **History**: ${formatBytes(storageStats.historySize)}\n- **Context**: ${formatBytes(storageStats.contextSize)}\n- **Logs**: ${formatBytes(storageStats.logsSize)}\n- **Cache**: ${formatBytes(storageStats.cacheSize)}\n\n## Recent Changes\n\n`;
+    const content = `# 📊 Miaoda Project Dashboard\n\n## Project Statistics\n\n- **Total Files Modified**: ${stats.totalFiles}\n- **Total Changes**: ${stats.totalChanges}\n- **Active Time**: ${formatDuration(stats.activeTime)}\n- **Last Modified**: ${new Date(stats.lastModified).toLocaleString()}\n\n## Storage Usage\n\n- **Total Size**: ${storageStats.totalSizeFormatted || formatBytes(storageStats.totalSize)}\n- **Files**: ${storageStats.fileCount ?? '-'}\n- **Directories**: ${storageStats.directoryCount ?? '-'}\n\n## Recent Changes\n\n`;
 
     const recentChanges = await manager.getRecentChanges(10);
     let changesList = '';
@@ -215,7 +228,12 @@ async function handleOptimize(manager: ProjectManager): Promise<void> {
       }
     );
 
-    vscode.window.showInformationMessage('Project storage optimized successfully!');
+    const apiClient = manager.getStorageManager().getAPIClient();
+    if (apiClient) {
+      vscode.window.showInformationMessage('Project storage optimized via remote API!');
+    } else {
+      vscode.window.showInformationMessage('Project storage optimized locally!');
+    }
   } catch (error) {
     vscode.window.showErrorMessage(`Failed to optimize storage: ${error}`);
   }

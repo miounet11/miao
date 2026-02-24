@@ -1,0 +1,64 @@
+{
+  "name": "knowledge-graph",
+  "displayName": "Miaoda Knowledge Graph",
+  "description": "Project-level semantic understanding and knowledge sharing",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.kg.buildGraph",
+        "title": "Build Knowledge Graph",
+        "category": "Miaoda",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "miaoda.kg.visualize",
+        "title": "Visualize Knowledge Graph",
+        "category": "Miaoda",
+        "icon": "$(graph-scatter)"
+      },
+      {
+        "command": "miaoda.kg.query",
+        "title": "Query Knowledge Graph",
+        "category": "Miaoda",
+        "icon": "$(search)"
+      },
+      {
+        "command": "miaoda.kg.recommend",
+        "title": "Get Context Recommendations",
+        "category": "Miaoda",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "miaoda.kg.export",
+        "title": "Export Knowledge Graph",
+        "category": "Miaoda",
+        "icon": "$(export)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "miaoda.kg.query",
+        "key": "ctrl+shift+k",
+        "mac": "cmd+shift+k"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

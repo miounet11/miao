@@ -1,135 +1,173 @@
-import Database from 'better-sqlite3';
-import { config } from './env';
-import path from 'path';
-import fs from 'fs';
-
-let db: Database.Database | null = null;
+import { Pool, PoolClient } from 'pg';
+import Redis from 'ioredis';
 
 /**
- * Initialize database connection
+ * Database configuration interface
  */
-export function initDatabase(): Database.Database {
-  if (db) {
-    return db;
+export interface IDatabaseConfig {
+  postgres: {
+    host: string;
+    port: number;
+    database: string;
+    user: string;
+    password: string;
+    max: number;
+    idleTimeoutMillis: number;
+    connectionTimeoutMillis: number;
+  };
+  redis: {
+    host: string;
+    port: number;
+    password?: string;
+    db: number;
+    keyPrefix: string;
+  };
+}
+
+const dbConfig: IDatabaseConfig = {
+  postgres: {
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+    database: process.env.POSTGRES_DB || 'miaoda',
+    user: process.env.POSTGRES_USER || 'postgres',
+    password: process.env.POSTGRES_PASSWORD || '',
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  },
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
+    password: process.env.REDIS_PASSWORD,
+    db: parseInt(process.env.REDIS_DB || '0', 10),
+    keyPrefix: 'miaoda:',
+  },
+};
+
+let pgPool: Pool | null = null;
+let redisClient: Redis | null = null;
+
+/**
+ * Initialize PostgreSQL connection pool
+ */
+export async function initPostgres(): Promise<Pool> {
+  if (pgPool) {
+    return pgPool;
   }
 
-  // Ensure data directory exists
-  const dbPath = path.resolve(config.database.url);
-  const dbDir = path.dirname(dbPath);
+  pgPool = new Pool(dbConfig.postgres);
 
-  if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
+  // Test connection
+  try {
+    const client = await pgPool.connect();
+    await client.query('SELECT NOW()');
+    client.release();
+    console.log('✅ PostgreSQL connected');
+  } catch (error) {
+    console.error('❌ PostgreSQL connection failed:', error);
+    throw error;
   }
 
-  // Create database connection
-  db = new Database(dbPath, {
-    verbose: config.isDevelopment ? console.log : undefined,
+  return pgPool;
+}
+
+/**
+ * Initialize Redis connection
+ */
+export async function initRedis(): Promise<Redis> {
+  if (redisClient) {
+    return redisClient;
+  }
+
+  redisClient = new Redis({
+    host: dbConfig.redis.host,
+    port: dbConfig.redis.port,
+    password: dbConfig.redis.password,
+    db: dbConfig.redis.db,
+    keyPrefix: dbConfig.redis.keyPrefix,
+    retryStrategy: (times) => {
+      const delay = Math.min(times * 50, 2000);
+      return delay;
+    },
   });
 
-  // Enable foreign keys
-  db.pragma('foreign_keys = ON');
+  redisClient.on('error', (error) => {
+    console.error('❌ Redis error:', error);
+  });
 
-  // Set journal mode for better concurrency
-  db.pragma('journal_mode = WAL');
+  await new Promise<void>((resolve, reject) => {
+    redisClient!.once('ready', () => {
+      console.log('✅ Redis connected');
+      resolve();
+    });
+    redisClient!.once('error', reject);
+  });
 
-  // Initialize schema if needed
-  initSchema(db);
-
-  console.log(`✅ Database connected: ${dbPath}`);
-
-  return db;
+  return redisClient;
 }
 
 /**
- * Initialize database schema
+ * Get PostgreSQL pool instance
  */
-function initSchema(database: Database.Database): void {
-  // Check if tables exist
-  const tables = database
-    .prepare(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('users', 'model_configs', 'user_configs')"
-    )
-    .all();
-
-  if (tables.length === 3) {
-    return; // Schema already exists
+export function getPostgresPool(): Pool {
+  if (!pgPool) {
+    throw new Error('PostgreSQL not initialized. Call initPostgres() first.');
   }
-
-  console.log('📦 Initializing database schema...');
-
-  // Create users table
-  database.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      membership TEXT DEFAULT 'free' CHECK(membership IN ('free', 'pro', 'enterprise')),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-
-  // Create model_configs table
-  database.exec(`
-    CREATE TABLE IF NOT EXISTS model_configs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      provider TEXT NOT NULL,
-      model TEXT NOT NULL,
-      api_url TEXT NOT NULL,
-      membership_required TEXT DEFAULT 'free' CHECK(membership_required IN ('free', 'pro', 'enterprise')),
-      enabled BOOLEAN DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(provider, model)
-    );
-  `);
-
-  // Create user_configs table
-  database.exec(`
-    CREATE TABLE IF NOT EXISTS user_configs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      config_json TEXT NOT NULL,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-      UNIQUE(user_id)
-    );
-  `);
-
-  // Create indexes for better performance
-  database.exec(`
-    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-    CREATE INDEX IF NOT EXISTS idx_model_configs_membership ON model_configs(membership_required);
-    CREATE INDEX IF NOT EXISTS idx_user_configs_user_id ON user_configs(user_id);
-  `);
-
-  console.log('✅ Database schema initialized');
+  return pgPool;
 }
 
 /**
- * Get database instance
+ * Get Redis client instance
  */
-export function getDatabase(): Database.Database {
-  if (!db) {
-    return initDatabase();
+export function getRedisClient(): Redis {
+  if (!redisClient) {
+    throw new Error('Redis not initialized. Call initRedis() first.');
   }
-  return db;
+  return redisClient;
 }
 
 /**
- * Close database connection
+ * Execute a PostgreSQL transaction
  */
-export function closeDatabase(): void {
-  if (db) {
-    db.close();
-    db = null;
-    console.log('✅ Database connection closed');
+export async function transaction<T>(
+  fn: (client: PoolClient) => Promise<T>
+): Promise<T> {
+  const pool = getPostgresPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const result = await fn(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
   }
 }
 
 /**
- * Execute a transaction
+ * Close all database connections
  */
-export function transaction<T>(fn: (db: Database.Database) => T): T {
-  const database = getDatabase();
-  const txn = database.transaction(fn);
-  return txn(database);
+export async function closeDatabases(): Promise<void> {
+  if (pgPool) {
+    await pgPool.end();
+    pgPool = null;
+    console.log('✅ PostgreSQL connection closed');
+  }
+
+  if (redisClient) {
+    redisClient.disconnect();
+    redisClient = null;
+    console.log('✅ Redis connection closed');
+  }
+}
+
+/**
+ * Database instance getter
+ */
+export function db(): Pool {
+  return getPostgresPool();
 }

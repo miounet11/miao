@@ -509,19 +509,19 @@ export class QuickActionPanel {
 
             if (progress.runningTasks > 0) {
                 section.style.display = 'block';
-                content.innerHTML = `
+                content.innerHTML = \`
                     <div class="progress-item">
-                        <div>📊 ${progress.completedTasks}/${progress.totalTasks} 任务完成</div>
-                        ${progress.currentTask ? `
+                        <div>📊 \${progress.completedTasks}/\${progress.totalTasks} 任务完成</div>
+                        \${progress.currentTask ? \`
                             <div style="margin-top: 10px;">
-                                <div>🔄 ${progress.currentTask.name}</div>
+                                <div>🔄 \${progress.currentTask.name}</div>
                                 <div style="opacity: 0.8; font-size: 12px;">
-                                    ${progress.currentTask.currentStep} - ${progress.currentTask.progress}%
+                                    \${progress.currentTask.currentStep} - \${progress.currentTask.progress}%
                                 </div>
                             </div>
-                        ` : ''}
+                        \` : ''}
                     </div>
-                `;
+                \`;
             } else {
                 section.style.display = 'none';
             }

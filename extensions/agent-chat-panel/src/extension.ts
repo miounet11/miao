@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { registerChatCommands } from './commands';
 import { getChatController } from './ChatController';
 import { ChatViewProvider } from './ChatViewProvider';
+import { PipelineStatusPanel } from './PipelineStatusPanel';
 
 /**
  * Extension activation entry point
@@ -19,6 +20,16 @@ export function activate(context: vscode.ExtensionContext): void {
       ChatViewProvider.viewType,
       chatViewProvider
     )
+  );
+
+  // Initialize pipeline status panel
+  const pipelineStatusPanel = new PipelineStatusPanel(context);
+
+  // Register pipeline status command
+  context.subscriptions.push(
+    vscode.commands.registerCommand('miaoda.pipeline.showStatus', (pipelineId: string) => {
+      pipelineStatusPanel.show(pipelineId);
+    })
   );
 
   // Register all chat commands

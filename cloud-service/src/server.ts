@@ -1,6 +1,7 @@
 import { createApp } from './app';
 import { config } from './config/env';
-import { initDatabase, closeDatabase } from './config/database';
+import { initPostgres, initRedis, closeDatabases } from './config/database';
+import { createMigrationManager } from './config/migration-manager';
 import { logger } from './middleware/logger';
 
 /**
@@ -8,8 +9,13 @@ import { logger } from './middleware/logger';
  */
 async function startServer() {
   try {
-    // Initialize database
-    initDatabase();
+    // Initialize databases
+    await initPostgres();
+    await initRedis();
+
+    // Run migrations
+    const migrationManager = createMigrationManager();
+    await migrationManager.runPending();
 
     // Create Express app
     const app = createApp();
@@ -26,11 +32,11 @@ async function startServer() {
     const shutdown = async (signal: string) => {
       logger.info(`${signal} received, shutting down gracefully...`);
 
-      server.close(() => {
+      server.close(async () => {
         logger.info('HTTP server closed');
 
-        // Close database connection
-        closeDatabase();
+        // Close database connections
+        await closeDatabases();
 
         logger.info('Shutdown complete');
         process.exit(0);

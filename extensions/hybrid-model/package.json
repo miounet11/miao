@@ -1,0 +1,76 @@
+{
+  "name": "hybrid-model",
+  "displayName": "Miaoda Hybrid Model",
+  "description": "Local + Cloud hybrid model architecture with smart routing",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.hybrid.selectModel",
+        "title": "Select Model (Local/Cloud)",
+        "category": "Miaoda",
+        "icon": "$(server)"
+      },
+      {
+        "command": "miaoda.hybrid.downloadModel",
+        "title": "Download Local Model",
+        "category": "Miaoda",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "miaoda.hybrid.modelStats",
+        "title": "Model Statistics",
+        "category": "Miaoda",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "miaoda.hybrid.smartRoute",
+        "title": "Smart Routing Config",
+        "category": "Miaoda",
+        "icon": "$(settings-gear)"
+      }
+    ],
+    "configuration": {
+      "title": "Hybrid Model",
+      "properties": {
+        "miaoda.hybrid.preferLocal": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prefer local models when available"
+        },
+        "miaoda.hybrid.autoDownload": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically download recommended models"
+        },
+        "miaoda.hybrid.maxLocalTokens": {
+          "type": "number",
+          "default": 2048,
+          "description": "Maximum tokens for local model"
+        },
+        "miaoda.hybrid.offlineMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Force offline mode (local only)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

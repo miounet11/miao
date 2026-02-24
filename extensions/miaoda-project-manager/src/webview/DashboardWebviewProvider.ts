@@ -1,14 +1,20 @@
 import * as vscode from 'vscode';
 import { ProjectManager } from '../managers/ProjectManager';
+import { StorageAPIClient } from '../api/StorageAPIClient';
 
 export class DashboardWebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'miaoda.projectDashboard';
     private _view?: vscode.WebviewView;
+    private apiClient: StorageAPIClient | null = null;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
         private readonly projectManager: ProjectManager
     ) {}
+
+    setAPIClient(client: StorageAPIClient): void {
+        this.apiClient = client;
+    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -36,6 +42,12 @@ export class DashboardWebviewProvider implements vscode.WebviewViewProvider {
                 case 'optimize':
                     vscode.commands.executeCommand('miaoda.project.optimize');
                     break;
+                case 'remoteCleanup':
+                    await this.handleRemoteCleanup();
+                    break;
+                case 'remoteCompress':
+                    await this.handleRemoteCompress();
+                    break;
             }
         });
 
@@ -53,16 +65,70 @@ export class DashboardWebviewProvider implements vscode.WebviewViewProvider {
             const recentChanges = await this.projectManager.getRecentChanges(5);
             const session = await this.projectManager.getSessionManager().getCurrentSession();
 
+            // 获取远程数据
+            let monitor = null;
+            let snapshots = null;
+            let cleanupStats = null;
+            let storageHistory = null;
+            let remoteConfig = null;
+
+            if (this.apiClient) {
+                const [monitorResp, snapshotsResp, cleanupStatsResp, historyResp, configResp] = await Promise.all([
+                    this.apiClient.getMonitor().catch(() => ({ success: false })),
+                    this.apiClient.getSnapshots().catch(() => ({ success: false })),
+                    this.apiClient.getCleanupStats().catch(() => ({ success: false })),
+                    this.apiClient.getHistory().catch(() => ({ success: false })),
+                    this.apiClient.getConfig().catch(() => ({ success: false })),
+                ]);
+                if (monitorResp.success) { monitor = (monitorResp as any).data; }
+                if (snapshotsResp.success) { snapshots = (snapshotsResp as any).data; }
+                if (cleanupStatsResp.success) { cleanupStats = (cleanupStatsResp as any).data; }
+                if (historyResp.success) { storageHistory = (historyResp as any).data; }
+                if (configResp.success) { remoteConfig = (configResp as any).data; }
+            }
+
             this._view.webview.postMessage({
                 type: 'update',
                 data: {
                     stats,
                     storageStats,
                     recentChanges,
-                    session
+                    session,
+                    monitor,
+                    snapshots,
+                    cleanupStats,
+                    storageHistory,
+                    remoteConfig,
+                    hasRemote: !!this.apiClient,
                 }
             });
         }
+    }
+
+    private async handleRemoteCleanup(): Promise<void> {
+        if (!this.apiClient) { return; }
+        const resp = await this.apiClient.triggerCleanup();
+        if (resp.success) {
+            vscode.window.showInformationMessage(
+                `清理完成: 删除快照 ${resp.data?.snapshotsDeleted}, 临时文件 ${resp.data?.tempFilesDeleted}, 错误日志 ${resp.data?.errorLogsDeleted}, 释放 ${resp.data?.totalSpaceFreedFormatted || '0 B'}`
+            );
+        } else {
+            vscode.window.showErrorMessage(`清理失败: ${resp.error || resp.message}`);
+        }
+        await this.refresh();
+    }
+
+    private async handleRemoteCompress(): Promise<void> {
+        if (!this.apiClient) { return; }
+        const resp = await this.apiClient.triggerCompress(false);
+        if (resp.success) {
+            vscode.window.showInformationMessage(
+                `压缩完成: 压缩率 ${resp.data?.compressionRatio}%, 耗时 ${resp.data?.duration}ms`
+            );
+        } else {
+            vscode.window.showErrorMessage(`压缩失败: ${resp.error || resp.message}`);
+        }
+        await this.refresh();
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {
@@ -276,15 +342,35 @@ export class DashboardWebviewProvider implements vscode.WebviewViewProvider {
             <span class="info-value" id="totalSize">0 MB</span>
         </div>
         <div class="info-row">
-            <span class="info-label">History</span>
-            <span class="info-value" id="historySize">0 MB</span>
+            <span class="info-label">Files</span>
+            <span class="info-value" id="fileCount">-</span>
         </div>
         <div class="info-row">
-            <span class="info-label">Cache</span>
-            <span class="info-value" id="cacheSize">0 MB</span>
+            <span class="info-label">Directories</span>
+            <span class="info-value" id="dirCount">-</span>
         </div>
         <div class="progress-bar">
             <div class="progress-fill" id="storageProgress" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <div class="card" id="monitorCard" style="display:none">
+        <div class="card-title">📡 Monitor</div>
+        <div class="info-row">
+            <span class="info-label">Trend</span>
+            <span class="info-value" id="storageTrend">-</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Alerts</span>
+            <span class="info-value" id="alertCount">0</span>
+        </div>
+        <div id="recommendations" style="font-size:11px;opacity:0.7;margin-top:6px"></div>
+    </div>
+
+    <div class="card" id="snapshotsCard" style="display:none">
+        <div class="card-title">📦 Snapshots</div>
+        <div id="snapshotsList">
+            <div class="empty-state">No snapshots</div>
         </div>
     </div>
 
@@ -297,6 +383,8 @@ export class DashboardWebviewProvider implements vscode.WebviewViewProvider {
 
     <button class="btn" onclick="viewHistory()">📜 View Full History</button>
     <button class="btn btn-secondary" onclick="optimize()">⚡ Optimize Storage</button>
+    <button class="btn btn-secondary" id="btnRemoteCleanup" style="display:none" onclick="remoteCleanup()">🧹 Remote Cleanup</button>
+    <button class="btn btn-secondary" id="btnRemoteCompress" style="display:none" onclick="remoteCompress()">📦 Remote Compress</button>
 
     <script>
         const vscode = acquireVsCodeApi();
@@ -313,18 +401,50 @@ export class DashboardWebviewProvider implements vscode.WebviewViewProvider {
             document.getElementById('totalFiles').textContent = data.stats.totalFiles;
             document.getElementById('totalChanges').textContent = data.stats.totalChanges;
             document.getElementById('activeTime').textContent = formatDuration(data.stats.activeTime);
-            document.getElementById('storageUsed').textContent = formatBytes(data.storageStats.totalSize);
+            document.getElementById('storageUsed').textContent =
+                data.storageStats.totalSizeFormatted || formatBytes(data.storageStats.totalSize);
 
             // Update storage info
-            document.getElementById('totalSize').textContent = formatBytes(data.storageStats.totalSize);
-            document.getElementById('historySize').textContent = formatBytes(data.storageStats.historySize);
-            document.getElementById('cacheSize').textContent = formatBytes(data.storageStats.cacheSize);
+            document.getElementById('totalSize').textContent =
+                data.storageStats.totalSizeFormatted || formatBytes(data.storageStats.totalSize);
+            document.getElementById('fileCount').textContent =
+                data.storageStats.fileCount != null ? data.storageStats.fileCount : '-';
+            document.getElementById('dirCount').textContent =
+                data.storageStats.directoryCount != null ? data.storageStats.directoryCount : '-';
 
-            const storagePercent = Math.min((data.storageStats.totalSize / (2 * 1024 * 1024 * 1024)) * 100, 100);
+            var storagePercent = Math.min((data.storageStats.totalSize / (2 * 1024 * 1024 * 1024)) * 100, 100);
             document.getElementById('storageProgress').style.width = storagePercent + '%';
 
+            // Monitor card
+            if (data.monitor) {
+                document.getElementById('monitorCard').style.display = '';
+                document.getElementById('storageTrend').textContent = data.monitor.trend.trend;
+                document.getElementById('alertCount').textContent = data.monitor.alerts.length;
+                var recsHtml = (data.monitor.recommendations || []).map(function(r) {
+                    return '<div>• ' + r + '</div>';
+                }).join('');
+                document.getElementById('recommendations').innerHTML = recsHtml;
+            }
+
+            // Snapshots card
+            if (data.snapshots && data.snapshots.length > 0) {
+                document.getElementById('snapshotsCard').style.display = '';
+                document.getElementById('snapshotsList').innerHTML = data.snapshots.map(function(s) {
+                    return '<div class="info-row"><span class="info-label">' + s.id + '</span>' +
+                        '<span class="info-value">' + s.fileCount + ' files</span></div>';
+                }).join('');
+            } else if (data.hasRemote) {
+                document.getElementById('snapshotsCard').style.display = '';
+            }
+
+            // Remote action buttons
+            if (data.hasRemote) {
+                document.getElementById('btnRemoteCleanup').style.display = '';
+                document.getElementById('btnRemoteCompress').style.display = '';
+            }
+
             // Update recent changes
-            const changesContainer = document.getElementById('recentChanges');
+            var changesContainer = document.getElementById('recentChanges');
             if (data.recentChanges.length === 0) {
                 changesContainer.innerHTML = '<div class="empty-state">No recent changes</div>';
             } else {
@@ -364,6 +484,14 @@ export class DashboardWebviewProvider implements vscode.WebviewViewProvider {
 
         function optimize() {
             vscode.postMessage({ type: 'optimize' });
+        }
+
+        function remoteCleanup() {
+            vscode.postMessage({ type: 'remoteCleanup' });
+        }
+
+        function remoteCompress() {
+            vscode.postMessage({ type: 'remoteCompress' });
         }
 
         // Request initial data

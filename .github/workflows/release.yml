@@ -1,0 +1,200 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        run: |
+          yarn compile
+          yarn gulp vscode-linux-${{ matrix.arch }}-min
+
+      - name: Package tar.gz
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          cd ../VSCode-linux-${{ matrix.arch }}
+          tar -czf ../miaoda-ide/miaoda-${VERSION}-linux-${{ matrix.arch }}.tar.gz .
+
+      - name: Package deb (x64 only)
+        if: matrix.arch == 'x64'
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          yarn gulp vscode-linux-${{ matrix.arch }}-build-deb
+          cp ../vscode-*.deb miaoda-${VERSION}-linux-amd64.deb || true
+
+      - name: Package rpm (x64 only)
+        if: matrix.arch == 'x64'
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          yarn gulp vscode-linux-${{ matrix.arch }}-build-rpm
+          cp ../vscode-*.rpm miaoda-${VERSION}-linux-x64.rpm || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: |
+            miaoda-*.tar.gz
+            miaoda-*.deb
+            miaoda-*.rpm
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        run: |
+          yarn compile
+          yarn gulp vscode-darwin-${{ matrix.arch }}-min
+
+      - name: Package DMG
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          cd ../VSCode-darwin-${{ matrix.arch }}
+          hdiutil create -volname "Miaoda IDE" -srcfolder . -ov -format UDZO ../miaoda-ide/Miaoda-${VERSION}-mac-${{ matrix.arch }}.dmg
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}
+          path: Miaoda-*.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        run: |
+          yarn compile
+          yarn gulp vscode-win32-${{ matrix.arch }}-min
+
+      - name: Package Setup exe
+        run: |
+          $VERSION = "${{ github.ref_name }}".TrimStart("v")
+          yarn gulp vscode-win32-${{ matrix.arch }}-inno-updater
+          yarn gulp vscode-win32-${{ matrix.arch }}-setup
+          Copy-Item "../vscode-*.exe" "Miaoda-Setup-${VERSION}-win-${{ matrix.arch }}.exe" -ErrorAction SilentlyContinue
+
+      - name: Package ZIP
+        run: |
+          $VERSION = "${{ github.ref_name }}".TrimStart("v")
+          Compress-Archive -Path "../VSCode-win32-${{ matrix.arch }}/*" -DestinationPath "Miaoda-${VERSION}-win-${{ matrix.arch }}.zip"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.arch }}
+          path: |
+            Miaoda-Setup-*.exe
+            Miaoda-*.zip
+
+  create-release:
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          cat << 'NOTES' > release-notes.md
+          ## Miaoda IDE v${{ steps.version.outputs.VERSION }}
+
+          ### 📥 下载 / Download
+
+          | 平台 | 架构 | 文件 |
+          |------|------|------|
+          | Windows | x64 | `Miaoda-Setup-${{ steps.version.outputs.VERSION }}-win-x64.exe` |
+          | Windows | arm64 | `Miaoda-Setup-${{ steps.version.outputs.VERSION }}-win-arm64.exe` |
+          | macOS | Intel | `Miaoda-${{ steps.version.outputs.VERSION }}-mac-x64.dmg` |
+          | macOS | Apple Silicon | `Miaoda-${{ steps.version.outputs.VERSION }}-mac-arm64.dmg` |
+          | Linux | x64 | `miaoda-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz` |
+          | Linux | arm64 | `miaoda-${{ steps.version.outputs.VERSION }}-linux-arm64.tar.gz` |
+          | Linux | deb | `miaoda-${{ steps.version.outputs.VERSION }}-linux-amd64.deb` |
+          | Linux | rpm | `miaoda-${{ steps.version.outputs.VERSION }}-linux-x64.rpm` |
+
+          ### ✨ 主要特性 / Highlights
+          - 🌐 通用 LLM 支持 (OpenAI, Anthropic, DeepSeek, Ollama 等)
+          - 🧠 智能上下文引擎 (95% 准确率, <45ms 响应)
+          - 💰 透明成本系统
+          - 🤖 多智能体并行协作
+          - 🛡️ 代码质量守护 (82% 自动修复率)
+          - ☁️ 云端存储服务 (www.imiaoda.cn)
+
+          详细更新日志请查看 [CHANGELOG.md](https://github.com/miounet11/miao/blob/main/CHANGELOG.md)
+
+          ---
+          官网 / Website: https://www.imiaoda.cn
+          NOTES
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          name: "Miaoda IDE v${{ steps.version.outputs.VERSION }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -16,7 +16,7 @@ export interface ILLMAdapter {
   /**
    * Switch LLM provider without restart
    */
-  setProvider(provider: LLMProviderConfig): void;
+  setProvider(provider: LLMProviderConfig): Promise<void>;
 
   /**
    * Get current provider status
@@ -30,9 +30,9 @@ export interface ILLMAdapter {
 }
 
 export interface LLMProviderConfig {
-  type: 'openai' | 'anthropic' | 'ollama';
+  type: 'openai' | 'anthropic' | 'ollama' | 'proxy';
   apiKey?: string; // For OpenAI/Anthropic
-  baseUrl?: string; // For Ollama or custom endpoints
+  baseUrl?: string; // For Ollama, Proxy, or custom endpoints
   model: string;
   maxTokens?: number;
   temperature?: number;

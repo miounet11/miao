@@ -13,12 +13,18 @@ import {
   MiaodaTerminalProfileProvider,
   MiaodaTerminalLinkProvider,
 } from './MiaodaTerminalProfileProvider';
+import { registerAllCapabilities } from './capabilities/registerCapabilities';
 
 /**
  * Extension activation entry point
  */
 export function activate(context: vscode.ExtensionContext): void {
   console.log('Agent Orchestrator extension is now active');
+
+  // Register all client capabilities
+  registerAllCapabilities().catch(error => {
+    console.error('Failed to register capabilities:', error);
+  });
 
   // 激活集成系统
   activateIntegratedSystems(context);

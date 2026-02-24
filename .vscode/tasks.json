@@ -286,6 +286,12 @@
 			"dependsOn": [
 				"Core - Build"
 			]
+		},
+		{
+			"label": "Package Extensions",
+			"type": "shell",
+			"command": "./scripts/package-extensions.sh",
+			"problemMatcher": []
 		}
 	]
 }

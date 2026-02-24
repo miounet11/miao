@@ -1,0 +1,57 @@
+{
+  "name": "auth-service",
+  "displayName": "Auth Service",
+  "description": "Authentication and authorization service for Miaoda IDE",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.auth.login",
+        "title": "Login",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.auth.logout",
+        "title": "Logout",
+        "category": "Miaoda"
+      },
+      {
+        "command": "miaoda.auth.showStatus",
+        "title": "Show Auth Status",
+        "category": "Miaoda"
+      }
+    ],
+    "configuration": {
+      "title": "Miaoda Auth",
+      "properties": {
+        "miaoda.auth.apiBaseUrl": {
+          "type": "string",
+          "default": "https://api.miaoda.com",
+          "description": "Backend API base URL"
+        },
+        "miaoda.auth.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refresh access token before expiration"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

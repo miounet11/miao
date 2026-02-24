@@ -1,6 +1,6 @@
 {
   "name": "miaoda-ide",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "distro": "5f8805862a2917cf9adde714616dc196235a7014",
   "author": {
     "name": "Miaoda Team"
@@ -213,6 +213,7 @@
     "typescript": "^5.4.0-dev.20231116",
     "typescript-formatter": "7.1.0",
     "util": "^0.12.4",
+    "vitest": "^4.0.18",
     "vscode-nls-dev": "^3.3.1",
     "webpack": "^5.77.0",
     "webpack-cli": "^5.0.1",
@@ -222,10 +223,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/vscode.git"
+    "url": "https://github.com/miounet11/miao.git"
   },
   "bugs": {
-    "url": "https://github.com/microsoft/vscode/issues"
+    "url": "https://github.com/miounet11/miao/issues"
   },
   "optionalDependencies": {
     "windows-foreground-love": "0.5.0"

@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as zlib from 'zlib';
 import type { ProjectConfig, StorageStats, CompressionOptions, CleanupRules } from '../types';
+import { StorageAPIClient, type RemoteCleanupResult, type RemoteCompressResult } from '../api/StorageAPIClient';
 
 const DEFAULT_COMPRESSION_OPTIONS: CompressionOptions = {
   targetSize: 200 * 1024 * 1024, // 200MB
@@ -19,16 +20,34 @@ const SIZE_THRESHOLD = 2 * 1024 * 1024 * 1024; // 2GB
 
 /**
  * StorageManager - Manages storage, compression, and cleanup
+ * 支持本地模式和远程 API 模式（优先使用远程 API）
  */
 export class StorageManager {
   private config: ProjectConfig;
   private miaodaDir: string;
   private compressionOptions: CompressionOptions = DEFAULT_COMPRESSION_OPTIONS;
   private cleanupRules: CleanupRules = DEFAULT_CLEANUP_RULES;
+  private apiClient: StorageAPIClient | null = null;
+  private useRemote: boolean = false;
 
   constructor(config: ProjectConfig) {
     this.config = config;
     this.miaodaDir = config.miaodaDir;
+  }
+
+  /**
+   * 设置远程 API 客户端
+   */
+  setAPIClient(client: StorageAPIClient): void {
+    this.apiClient = client;
+    this.useRemote = true;
+  }
+
+  /**
+   * 获取 API 客户端（供外部使用）
+   */
+  getAPIClient(): StorageAPIClient | null {
+    return this.apiClient;
   }
 
   /**
@@ -61,22 +80,61 @@ export class StorageManager {
   }
 
   /**
-   * Get storage statistics
+   * Get storage statistics (远程优先，本地兜底)
    */
   async getStorageStats(): Promise<StorageStats> {
+    if (this.useRemote && this.apiClient) {
+      try {
+        const resp = await this.apiClient.getStats();
+        if (resp.success && resp.data) {
+          return {
+            totalSize: resp.data.totalSize,
+            totalSizeFormatted: resp.data.totalSizeFormatted,
+            fileCount: resp.data.fileCount,
+            directoryCount: resp.data.directoryCount,
+            historySize: 0,
+            contextSize: 0,
+            logsSize: 0,
+            cacheSize: 0,
+            lastUpdated: Date.now(),
+          };
+        }
+      } catch (error) {
+        console.warn('Remote storage stats failed, falling back to local:', error);
+      }
+    }
+    return this.getLocalStorageStats();
+  }
+
+  /**
+   * 本地存储统计
+   */
+  private getLocalStorageStats(): StorageStats {
     const historyDir = path.join(this.miaodaDir, 'history');
     const contextDir = path.join(this.miaodaDir, 'context');
     const logsDir = path.join(this.miaodaDir, 'logs');
     const cacheDir = path.join(this.miaodaDir, 'cache');
+    const totalSize = this.getDirectorySize(this.miaodaDir);
 
     return {
-      totalSize: this.getDirectorySize(this.miaodaDir),
+      totalSize,
+      totalSizeFormatted: this.formatBytes(totalSize),
+      fileCount: 0,
+      directoryCount: 0,
       historySize: this.getDirectorySize(historyDir),
       contextSize: this.getDirectorySize(contextDir),
       logsSize: this.getDirectorySize(logsDir),
       cacheSize: this.getDirectorySize(cacheDir),
       lastUpdated: Date.now(),
     };
+  }
+
+  private formatBytes(bytes: number): string {
+    if (bytes === 0) { return '0 B'; }
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   }
 
   /**
@@ -105,10 +163,27 @@ export class StorageManager {
   }
 
   /**
-   * Check and compress if needed
+   * Check and compress if needed (远程优先)
    */
-  async checkAndCompress(): Promise<void> {
-    const stats = await this.getStorageStats();
+  async checkAndCompress(): Promise<RemoteCompressResult | void> {
+    if (this.useRemote && this.apiClient) {
+      try {
+        const resp = await this.apiClient.triggerCompress(false);
+        if (resp.success && resp.data) {
+          return resp.data;
+        }
+      } catch (error) {
+        console.warn('Remote compress failed, falling back to local:', error);
+      }
+    }
+    return this.localCheckAndCompress();
+  }
+
+  /**
+   * 本地压缩逻辑
+   */
+  private async localCheckAndCompress(): Promise<void> {
+    const stats = await this.getLocalStorageStats();
 
     // Rule 1: Size exceeds threshold
     if (stats.totalSize > SIZE_THRESHOLD) {
@@ -227,9 +302,26 @@ export class StorageManager {
   }
 
   /**
-   * Cleanup old files
+   * Cleanup old files (远程优先)
    */
-  async cleanup(): Promise<void> {
+  async cleanup(): Promise<RemoteCleanupResult | void> {
+    if (this.useRemote && this.apiClient) {
+      try {
+        const resp = await this.apiClient.triggerCleanup();
+        if (resp.success && resp.data) {
+          return resp.data;
+        }
+      } catch (error) {
+        console.warn('Remote cleanup failed, falling back to local:', error);
+      }
+    }
+    return this.localCleanup();
+  }
+
+  /**
+   * 本地清理逻辑
+   */
+  private async localCleanup(): Promise<void> {
     try {
       // Clean up old snapshots
       await this.cleanupSnapshots();

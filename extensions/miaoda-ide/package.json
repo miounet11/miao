@@ -1,0 +1,22 @@
+{
+  "name": "miaoda-ide",
+  "displayName": "Miaoda IDE",
+  "description": "AI-powered development environment with multi-agent orchestration",
+  "version": "0.9.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Extension Packs"],
+  "keywords": ["ai", "agent", "orchestration", "productivity"],
+  "extensionPack": [
+    "miaoda.agent-orchestrator",
+    "miaoda.agent-chat-panel",
+    "miaoda.skills-manager"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/miaoda/miaoda-ide"
+  },
+  "license": "MIT"
+}

@@ -1,4 +1,4 @@
-import { getDatabase } from '../config/database';
+import { db } from '../config/database';
 
 export interface User {
   id: number;
@@ -28,61 +28,52 @@ export class UserModel {
   /**
    * Create a new user
    */
-  static create(input: UserCreateInput): User {
-    const db = getDatabase();
-    const stmt = db.prepare(`
-      INSERT INTO users (email, password_hash, membership)
-      VALUES (?, ?, ?)
-    `);
-
-    const result = stmt.run(
-      input.email,
-      input.password_hash,
-      input.membership || 'free'
+  static async create(input: UserCreateInput): Promise<User> {
+    const result = await db().query(
+      `INSERT INTO users (email, password_hash, membership)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [input.email, input.password_hash, input.membership || 'free']
     );
-
-    return this.findById(result.lastInsertRowid as number)!;
+    return result.rows[0] as User;
   }
 
   /**
    * Find user by ID
    */
-  static findById(id: number): User | null {
-    const db = getDatabase();
-    const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-    return stmt.get(id) as User | null;
+  static async findById(id: number): Promise<User | null> {
+    const result = await db().query('SELECT * FROM users WHERE id = $1', [id]);
+    return result.rows[0] || null;
   }
 
   /**
    * Find user by email
    */
-  static findByEmail(email: string): User | null {
-    const db = getDatabase();
-    const stmt = db.prepare('SELECT * FROM users WHERE email = ?');
-    return stmt.get(email) as User | null;
+  static async findByEmail(email: string): Promise<User | null> {
+    const result = await db().query('SELECT * FROM users WHERE email = $1', [email]);
+    return result.rows[0] || null;
   }
 
   /**
    * Update user membership
    */
-  static updateMembership(
+  static async updateMembership(
     id: number,
     membership: 'free' | 'pro' | 'enterprise'
-  ): boolean {
-    const db = getDatabase();
-    const stmt = db.prepare('UPDATE users SET membership = ? WHERE id = ?');
-    const result = stmt.run(membership, id);
-    return result.changes > 0;
+  ): Promise<boolean> {
+    const result = await db().query(
+      'UPDATE users SET membership = $1 WHERE id = $2',
+      [membership, id]
+    );
+    return result.rowCount > 0;
   }
 
   /**
    * Delete user
    */
-  static delete(id: number): boolean {
-    const db = getDatabase();
-    const stmt = db.prepare('DELETE FROM users WHERE id = ?');
-    const result = stmt.run(id);
-    return result.changes > 0;
+  static async delete(id: number): Promise<boolean> {
+    const result = await db().query('DELETE FROM users WHERE id = $1', [id]);
+    return result.rowCount > 0;
   }
 
   /**

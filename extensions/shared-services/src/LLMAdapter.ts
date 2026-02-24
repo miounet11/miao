@@ -7,107 +7,18 @@ import {
   ProviderStatus,
   ModelInfo,
 } from './ILLMAdapter';
+import type { LLMError } from './llm/llm-error';
 
 /**
  * Abstract base class for LLM providers
  */
-abstract class BaseLLMProvider {
+export abstract class BaseLLMProvider {
   constructor(protected config: LLMProviderConfig) {}
 
   abstract complete(request: LLMRequest): Promise<LLMResponse>;
   abstract stream(request: LLMRequest): AsyncIterable<LLMChunk>;
   abstract getStatus(): Promise<ProviderStatus>;
   abstract listModels(): Promise<ModelInfo[]>;
-}
-
-/**
- * OpenAI provider implementation
- */
-class OpenAIProvider extends BaseLLMProvider {
-  async complete(request: LLMRequest): Promise<LLMResponse> {
-    // Placeholder: Will integrate OpenAI SDK
-    return {
-      content: 'OpenAI response',
-      usage: { promptTokens: 0, completionTokens: 0 },
-      model: this.config.model,
-    };
-  }
-
-  async *stream(request: LLMRequest): AsyncIterable<LLMChunk> {
-    // Placeholder: Will integrate OpenAI SDK streaming
-    yield { content: 'OpenAI stream chunk', done: false };
-    yield { content: '', done: true };
-  }
-
-  async getStatus(): Promise<ProviderStatus> {
-    return {
-      connected: true,
-      provider: 'openai',
-      model: this.config.model,
-    };
-  }
-
-  async listModels(): Promise<ModelInfo[]> {
-    return [
-      {
-        id: 'gpt-4',
-        name: 'GPT-4',
-        provider: 'openai',
-        contextWindow: 8192,
-      },
-      {
-        id: 'gpt-3.5-turbo',
-        name: 'GPT-3.5 Turbo',
-        provider: 'openai',
-        contextWindow: 4096,
-      },
-    ];
-  }
-}
-
-/**
- * Anthropic provider implementation
- */
-class AnthropicProvider extends BaseLLMProvider {
-  async complete(request: LLMRequest): Promise<LLMResponse> {
-    // Placeholder: Will integrate Anthropic SDK
-    return {
-      content: 'Anthropic response',
-      usage: { promptTokens: 0, completionTokens: 0 },
-      model: this.config.model,
-    };
-  }
-
-  async *stream(request: LLMRequest): AsyncIterable<LLMChunk> {
-    // Placeholder: Will integrate Anthropic SDK streaming
-    yield { content: 'Anthropic stream chunk', done: false };
-    yield { content: '', done: true };
-  }
-
-  async getStatus(): Promise<ProviderStatus> {
-    return {
-      connected: true,
-      provider: 'anthropic',
-      model: this.config.model,
-    };
-  }
-
-  async listModels(): Promise<ModelInfo[]> {
-    return [
-      {
-        id: 'claude-opus-4',
-        name: 'Claude Opus 4',
-        provider: 'anthropic',
-        contextWindow: 200000,
-      },
-      {
-        id: 'claude-sonnet-4',
-        name: 'Claude Sonnet 4',
-        provider: 'anthropic',
-        contextWindow: 200000,
-      },
-    ];
-  }
 }
 
 /**
@@ -203,39 +114,81 @@ export class LLMAdapter implements ILLMAdapter {
    */
   async complete(request: LLMRequest): Promise<LLMResponse> {
     if (!this.currentProvider) {
-      throw new Error('No LLM provider configured. Call setProvider() first.');
+      const error: LLMError = {
+        type: 'server_error',
+        statusCode: 500,
+        message: 'No LLM provider configured',
+        suggestion: 'Configure an API key in settings before using LLM features.',
+        provider: 'none',
+        retryable: false,
+      };
+      throw error;
     }
-    return this.currentProvider.complete(request);
+    try {
+      return await this.currentProvider.complete(request);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Stream completion response
    */
-  stream(request: LLMRequest): AsyncIterable<LLMChunk> {
+  async *stream(request: LLMRequest): AsyncIterable<LLMChunk> {
     if (!this.currentProvider) {
-      throw new Error('No LLM provider configured. Call setProvider() first.');
+      const error: LLMError = {
+        type: 'server_error',
+        statusCode: 500,
+        message: 'No LLM provider configured',
+        suggestion: 'Configure an API key in settings before using LLM features.',
+        provider: 'none',
+        retryable: false,
+      };
+      throw error;
     }
-    return this.currentProvider.stream(request);
+    try {
+      yield* this.currentProvider.stream(request);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Switch LLM provider without restart (hot-swap)
    */
-  setProvider(config: LLMProviderConfig): void {
+  async setProvider(config: LLMProviderConfig): Promise<void> {
     this.currentConfig = config;
 
+    // Lazy load providers
     switch (config.type) {
-      case 'openai':
+      case 'openai': {
+        const { OpenAIProvider } = await import('./llm/providers/openai-provider');
         this.currentProvider = new OpenAIProvider(config);
         break;
-      case 'anthropic':
+      }
+      case 'anthropic': {
+        const { AnthropicProvider } = await import('./llm/providers/anthropic-provider');
         this.currentProvider = new AnthropicProvider(config);
         break;
+      }
       case 'ollama':
         this.currentProvider = new OllamaProvider(config);
         break;
+      case 'proxy': {
+        const { ProxyProvider } = await import('./llm/providers/proxy-provider');
+        this.currentProvider = new ProxyProvider(config);
+        break;
+      }
       default:
-        throw new Error(`Unsupported provider type: ${config.type}`);
+        const error: LLMError = {
+          type: 'server_error',
+          statusCode: 500,
+          message: `Unsupported provider type: ${config.type}`,
+          suggestion: 'Use openai, anthropic, ollama, or proxy as provider type.',
+          provider: config.type,
+          retryable: false,
+        };
+        throw error;
     }
   }
 
@@ -269,6 +222,19 @@ export class LLMAdapter implements ILLMAdapter {
    */
   getCurrentConfig(): LLMProviderConfig | null {
     return this.currentConfig;
+  }
+
+  /**
+   * Set access token for proxy provider
+   * This should be called after user authentication
+   */
+  async setProxyAccessToken(token: string | null): Promise<void> {
+    if (this.currentProvider && this.currentConfig?.type === 'proxy') {
+      const { ProxyProvider } = await import('./llm/providers/proxy-provider');
+      if (this.currentProvider instanceof ProxyProvider) {
+        this.currentProvider.setAccessToken(token);
+      }
+    }
   }
 }
 

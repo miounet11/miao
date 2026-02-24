@@ -1,0 +1,77 @@
+{
+  "name": "embedding-service",
+  "displayName": "Miaoda Embedding Service",
+  "description": "Real embedding models (CodeBERT, GraphCodeBERT) for semantic code search",
+  "version": "0.1.0",
+  "publisher": "miaoda",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "miaoda.embedding.selectModel",
+        "title": "Select Embedding Model",
+        "category": "Miaoda",
+        "icon": "$(symbol-namespace)"
+      },
+      {
+        "command": "miaoda.embedding.downloadModel",
+        "title": "Download Embedding Model",
+        "category": "Miaoda",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "miaoda.embedding.benchmark",
+        "title": "Benchmark Embedding Models",
+        "category": "Miaoda",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "miaoda.embedding.reindex",
+        "title": "Reindex with New Model",
+        "category": "Miaoda",
+        "icon": "$(refresh)"
+      }
+    ],
+    "configuration": {
+      "title": "Embedding Service",
+      "properties": {
+        "miaoda.embedding.model": {
+          "type": "string",
+          "enum": ["tfidf", "codebert", "graphcodebert", "unixcoder"],
+          "default": "tfidf",
+          "description": "Embedding model to use"
+        },
+        "miaoda.embedding.dimensions": {
+          "type": "number",
+          "default": 768,
+          "description": "Embedding vector dimensions"
+        },
+        "miaoda.embedding.batchSize": {
+          "type": "number",
+          "default": 32,
+          "description": "Batch size for embedding generation"
+        },
+        "miaoda.embedding.useGPU": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use GPU acceleration if available"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
+}

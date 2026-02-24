@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getDatabase } from '../config/database';
+import { db } from '../config/database';
 import { config } from '../config/env';
 
 const router = Router();
@@ -11,8 +11,7 @@ const router = Router();
 router.get('/', (req: Request, res: Response) => {
   try {
     // Check database connection
-    const db = getDatabase();
-    const result = db.prepare('SELECT 1 as health').get() as { health: number };
+    const result = db().query('SELECT 1 as health').get() as { health: number };
 
     const healthCheck = {
       status: 'healthy',

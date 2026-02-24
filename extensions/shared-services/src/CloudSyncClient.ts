@@ -27,7 +27,7 @@ export class CloudSyncClient {
    */
   private getCloudUrl(): string {
     const config = vscode.workspace.getConfiguration('miaoda');
-    return config.get('cloudUrl', 'https://cloud.miaoda.ai');
+    return config.get('cloudUrl', 'https://www.imiaoda.cn');
   }
 
   /**
