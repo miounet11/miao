@@ -254,30 +254,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Determine version
+        id: ver
+        run: |
+          if [[ "$GITHUB_REF_NAME" == v* ]]; then
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=$(python3 -c 'import json; print(json.load(open(\"package.json\"))[\"version\"])')" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create source packages
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
-          mkdir -p release-artifacts
-          # Create clean source tarball (exclude .git, node_modules, out, dist)
+          VERSION=${{ steps.ver.outputs.VERSION }}
+          mkdir -p /tmp/release-artifacts
           tar --exclude='.git' --exclude='node_modules' --exclude='out' --exclude='dist' \
             --exclude='.build' --exclude='__mocks__' \
-            -czf "release-artifacts/miaoda-${VERSION}-source.tar.gz" -C .. "$(basename $(pwd))"
-          # Create source zip
-          cd ..
-          zip -r -q "$(basename $OLDPWD)/release-artifacts/miaoda-${VERSION}-source.zip" \
-            "$(basename $OLDPWD)" \
-            -x "$(basename $OLDPWD)/.git/*" \
-            -x "$(basename $OLDPWD)/node_modules/*" \
-            -x "$(basename $OLDPWD)/out/*" \
-            -x "$(basename $OLDPWD)/dist/*" \
-            -x "$(basename $OLDPWD)/.build/*"
-          cd $OLDPWD
-          ls -lh release-artifacts/
+            -czf "/tmp/release-artifacts/miaoda-${VERSION}-source.tar.gz" .
+          zip -r -q "/tmp/release-artifacts/miaoda-${VERSION}-source.zip" . \
+            -x ".git/*" "node_modules/*" "out/*" "dist/*" ".build/*" "__mocks__/*"
+          ls -lh /tmp/release-artifacts/
 
       - uses: actions/upload-artifact@v4
         with:
           name: source
-          path: release-artifacts/*
+          path: /tmp/release-artifacts/*
 
   # ============================================================
   # Create GitHub Release with all artifacts
@@ -288,6 +288,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Determine version
+        id: ver
+        run: |
+          if [[ "$GITHUB_REF_NAME" == v* ]]; then
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+            echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          else
+            VER=$(python3 -c 'import json; print(json.load(open("package.json"))["version"])')
+            echo "VERSION=${VER}" >> $GITHUB_OUTPUT
+            echo "TAG=v${VER}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -300,45 +312,33 @@ jobs:
 
       - name: Generate release notes
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
-          cat > release-notes.md << ENDOFNOTES
-          ## Miaoda IDE v${VERSION} (妙搭)
+          VERSION=${{ steps.ver.outputs.VERSION }}
+          cat > release-notes.md << 'ENDOFNOTES'
+          ## Miaoda IDE (妙搭)
 
-          🎉 Official Release / 正式发布
+          Official Release / 正式发布
 
           官网 / Website: https://www.imiaoda.cn
 
-          ### ✨ Key Features
+          ### Key Features
 
-          - 🌐 Universal LLM Support (OpenAI, Anthropic, DeepSeek, Ollama, etc.)
-          - 🧠 Smart Context Engine (95% accuracy, <45ms)
-          - 💰 Transparent Cost System
-          - 🤖 Multi-Agent Orchestration (3-5x speedup)
-          - 🛡️ Code Quality Guardian (82% auto-fix)
-          - ☁️ Cloud Storage Service (www.imiaoda.cn)
-
-          ### 📥 Downloads
-
-          | Platform | File |
-          |----------|------|
-          | Linux x64 | miaoda-${VERSION}-linux-x64.tar.gz |
-          | Linux deb | miaoda-${VERSION}-linux-amd64.deb |
-          | macOS Intel | Miaoda-${VERSION}-mac-x64.dmg / .zip |
-          | macOS Apple Silicon | Miaoda-${VERSION}-mac-arm64.dmg / .zip |
-          | Windows x64 | Miaoda-${VERSION}-win-x64.zip |
-          | Source | miaoda-${VERSION}-source.tar.gz / .zip |
+          - Universal LLM Support (OpenAI, Anthropic, DeepSeek, Ollama, etc.)
+          - Smart Context Engine (95% accuracy, <45ms)
+          - Transparent Cost System
+          - Multi-Agent Orchestration (3-5x speedup)
+          - Code Quality Guardian (82% auto-fix)
+          - Cloud Storage Service (www.imiaoda.cn)
 
           ### Build from Source
 
-          \`\`\`bash
+          ```bash
           git clone https://github.com/miounet11/miao.git
           cd miao && yarn install && yarn compile
           ./scripts/code.sh
-          \`\`\`
+          ```
 
-          [CHANGELOG](https://github.com/miounet11/miao/blob/main/CHANGELOG.md) · [ROADMAP](https://github.com/miounet11/miao/blob/main/ROADMAP.md)
+          [CHANGELOG](https://github.com/miounet11/miao/blob/main/CHANGELOG.md) | [ROADMAP](https://github.com/miounet11/miao/blob/main/ROADMAP.md)
           ENDOFNOTES
-          # Remove leading whitespace from heredoc
           sed -i 's/^          //' release-notes.md
 
       - name: Create GitHub Release
@@ -348,7 +348,7 @@ jobs:
           body_path: release-notes.md
           draft: false
           prerelease: false
-          name: "Miaoda IDE ${{ github.ref_name }}"
-          tag_name: ${{ github.ref_name }}
+          name: "Miaoda IDE v${{ steps.ver.outputs.VERSION }}"
+          tag_name: ${{ steps.ver.outputs.TAG }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
