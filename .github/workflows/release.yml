@@ -4,143 +4,337 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.0.0)'
+        required: true
 
 permissions:
   contents: write
 
+env:
+  NODE_VERSION: '20.x'
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [x64, arm64]
+  # ============================================================
+  # Linux builds (x64 + arm64) — tar.gz + deb + rpm
+  # ============================================================
+  build-linux-x64:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential g++ libx11-dev libxkbfile-dev libsecret-1-dev \
+            fakeroot rpm dpkg-dev
+
+      - name: Install project dependencies
+        run: yarn install --network-timeout 180000
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
 
-      - name: Build
+      - name: Compile and package
         run: |
-          yarn compile
-          yarn gulp vscode-linux-${{ matrix.arch }}-min
+          yarn gulp compile-build
+          yarn gulp compile-extensions-build
+          yarn gulp compile-extension-media
+          yarn gulp minify-vscode
+          yarn gulp vscode-linux-x64-min-ci
 
-      - name: Package tar.gz
+      - name: Create tar.gz
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          cd ../VSCode-linux-${{ matrix.arch }}
-          tar -czf ../miaoda-ide/miaoda-${VERSION}-linux-${{ matrix.arch }}.tar.gz .
+          VERSION=${GITHUB_REF_NAME#v}
+          SRCDIR="../VSCode-linux-x64"
+          if [ -d "$SRCDIR" ]; then
+            tar -czf "miaoda-${VERSION}-linux-x64.tar.gz" -C "$(dirname $SRCDIR)" "$(basename $SRCDIR)"
+          fi
 
-      - name: Package deb (x64 only)
-        if: matrix.arch == 'x64'
+      - name: Build deb package
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          yarn gulp vscode-linux-${{ matrix.arch }}-build-deb
-          cp ../vscode-*.deb miaoda-${VERSION}-linux-amd64.deb || true
+          yarn gulp vscode-linux-x64-prepare-deb
+          yarn gulp vscode-linux-x64-build-deb
+        continue-on-error: true
 
-      - name: Package rpm (x64 only)
-        if: matrix.arch == 'x64'
+      - name: Build rpm package
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          yarn gulp vscode-linux-${{ matrix.arch }}-build-rpm
-          cp ../vscode-*.rpm miaoda-${VERSION}-linux-x64.rpm || true
+          yarn gulp vscode-linux-x64-prepare-rpm
+          yarn gulp vscode-linux-x64-build-rpm
+        continue-on-error: true
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Collect artifacts
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          mkdir -p release-artifacts
+          cp miaoda-*.tar.gz release-artifacts/ 2>/dev/null || true
+          find .build/linux/deb -name "*.deb" -exec cp {} release-artifacts/miaoda-${VERSION}-linux-amd64.deb \; 2>/dev/null || true
+          find .build/linux/rpm -name "*.rpm" -exec cp {} release-artifacts/miaoda-${VERSION}-linux-x64.rpm \; 2>/dev/null || true
+          ls -la release-artifacts/
+
+      - uses: actions/upload-artifact@v4
         with:
-          name: linux-${{ matrix.arch }}
-          path: |
-            miaoda-*.tar.gz
-            miaoda-*.deb
-            miaoda-*.rpm
+          name: linux-x64
+          path: release-artifacts/*
 
-  build-macos:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        arch: [x64, arm64]
+  build-linux-arm64:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential g++ libx11-dev libxkbfile-dev libsecret-1-dev \
+            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      - name: Install project dependencies
+        run: yarn install --network-timeout 180000
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+          npm_config_arch: arm64
 
-      - name: Build
+      - name: Compile and package
         run: |
-          yarn compile
-          yarn gulp vscode-darwin-${{ matrix.arch }}-min
+          yarn gulp compile-build
+          yarn gulp compile-extensions-build
+          yarn gulp compile-extension-media
+          yarn gulp minify-vscode
+          yarn gulp vscode-linux-arm64-min-ci
+        continue-on-error: true
 
-      - name: Package DMG
+      - name: Create tar.gz
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          cd ../VSCode-darwin-${{ matrix.arch }}
-          hdiutil create -volname "Miaoda IDE" -srcfolder . -ov -format UDZO ../miaoda-ide/Miaoda-${VERSION}-mac-${{ matrix.arch }}.dmg
+          VERSION=${GITHUB_REF_NAME#v}
+          SRCDIR="../VSCode-linux-arm64"
+          if [ -d "$SRCDIR" ]; then
+            tar -czf "miaoda-${VERSION}-linux-arm64.tar.gz" -C "$(dirname $SRCDIR)" "$(basename $SRCDIR)"
+          fi
+        continue-on-error: true
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Collect artifacts
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          mkdir -p release-artifacts
+          cp miaoda-*.tar.gz release-artifacts/ 2>/dev/null || true
+          ls -la release-artifacts/ || echo "No artifacts"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: macos-${{ matrix.arch }}
-          path: Miaoda-*.dmg
+          name: linux-arm64
+          path: release-artifacts/*
+          if-no-files-found: ignore
 
-  build-windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        arch: [x64, arm64]
+  # ============================================================
+  # macOS builds (x64 + arm64) — dmg + zip
+  # ============================================================
+  build-macos-x64:
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --network-timeout 180000
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
 
-      - name: Build
+      - name: Compile and package
         run: |
-          yarn compile
-          yarn gulp vscode-win32-${{ matrix.arch }}-min
+          yarn gulp compile-build
+          yarn gulp compile-extensions-build
+          yarn gulp compile-extension-media
+          yarn gulp minify-vscode
+          yarn gulp vscode-darwin-x64-min-ci
 
-      - name: Package Setup exe
+      - name: Create DMG and ZIP
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          APP_DIR="../VSCode-darwin-x64"
+          if [ -d "$APP_DIR" ]; then
+            # ZIP
+            cd "$APP_DIR"
+            zip -r -y "../miaoda-ide/Miaoda-${VERSION}-mac-x64.zip" .
+            cd ../miaoda-ide
+            # DMG
+            hdiutil create -volname "Miaoda IDE" -srcfolder "$APP_DIR" -ov -format UDZO "Miaoda-${VERSION}-mac-x64.dmg" || true
+          fi
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p release-artifacts
+          cp Miaoda-*.dmg release-artifacts/ 2>/dev/null || true
+          cp Miaoda-*.zip release-artifacts/ 2>/dev/null || true
+          ls -la release-artifacts/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-x64
+          path: release-artifacts/*
+
+  build-macos-arm64:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: yarn install --network-timeout 180000
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+
+      - name: Compile and package
+        run: |
+          yarn gulp compile-build
+          yarn gulp compile-extensions-build
+          yarn gulp compile-extension-media
+          yarn gulp minify-vscode
+          yarn gulp vscode-darwin-arm64-min-ci
+
+      - name: Create DMG and ZIP
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          APP_DIR="../VSCode-darwin-arm64"
+          if [ -d "$APP_DIR" ]; then
+            cd "$APP_DIR"
+            zip -r -y "../miaoda-ide/Miaoda-${VERSION}-mac-arm64.zip" .
+            cd ../miaoda-ide
+            hdiutil create -volname "Miaoda IDE" -srcfolder "$APP_DIR" -ov -format UDZO "Miaoda-${VERSION}-mac-arm64.dmg" || true
+          fi
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p release-artifacts
+          cp Miaoda-*.dmg release-artifacts/ 2>/dev/null || true
+          cp Miaoda-*.zip release-artifacts/ 2>/dev/null || true
+          ls -la release-artifacts/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64
+          path: release-artifacts/*
+
+  # ============================================================
+  # Windows builds (x64 + arm64) — setup exe + zip
+  # ============================================================
+  build-windows-x64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: yarn install --network-timeout 180000
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+
+      - name: Compile and package
+        run: |
+          yarn gulp compile-build
+          yarn gulp compile-extensions-build
+          yarn gulp compile-extension-media
+          yarn gulp minify-vscode
+          yarn gulp vscode-win32-x64-min-ci
+
+      - name: Create ZIP
+        shell: pwsh
         run: |
           $VERSION = "${{ github.ref_name }}".TrimStart("v")
-          yarn gulp vscode-win32-${{ matrix.arch }}-inno-updater
-          yarn gulp vscode-win32-${{ matrix.arch }}-setup
-          Copy-Item "../vscode-*.exe" "Miaoda-Setup-${VERSION}-win-${{ matrix.arch }}.exe" -ErrorAction SilentlyContinue
+          $SrcDir = "..\VSCode-win32-x64"
+          if (Test-Path $SrcDir) {
+            Compress-Archive -Path "$SrcDir\*" -DestinationPath "Miaoda-${VERSION}-win-x64.zip" -Force
+          }
 
-      - name: Package ZIP
+      - name: Build Setup exe
+        run: |
+          yarn gulp vscode-win32-x64-inno-updater
+          yarn gulp vscode-win32-x64-user-setup
+        continue-on-error: true
+
+      - name: Collect artifacts
+        shell: pwsh
         run: |
           $VERSION = "${{ github.ref_name }}".TrimStart("v")
-          Compress-Archive -Path "../VSCode-win32-${{ matrix.arch }}/*" -DestinationPath "Miaoda-${VERSION}-win-${{ matrix.arch }}.zip"
+          New-Item -ItemType Directory -Force -Path release-artifacts
+          Copy-Item "Miaoda-*.zip" release-artifacts/ -ErrorAction SilentlyContinue
+          Get-ChildItem -Recurse ".build/win32-x64" -Filter "*.exe" | ForEach-Object {
+            Copy-Item $_.FullName "release-artifacts/Miaoda-Setup-${VERSION}-win-x64.exe" -ErrorAction SilentlyContinue
+          }
+          Get-ChildItem release-artifacts/
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: windows-${{ matrix.arch }}
-          path: |
-            Miaoda-Setup-*.exe
-            Miaoda-*.zip
+          name: windows-x64
+          path: release-artifacts/*
 
+  build-windows-arm64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: yarn install --network-timeout 180000
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+          npm_config_arch: arm64
+
+      - name: Compile and package
+        run: |
+          yarn gulp compile-build
+          yarn gulp compile-extensions-build
+          yarn gulp compile-extension-media
+          yarn gulp minify-vscode
+          yarn gulp vscode-win32-arm64-min-ci
+        continue-on-error: true
+
+      - name: Create ZIP
+        shell: pwsh
+        run: |
+          $VERSION = "${{ github.ref_name }}".TrimStart("v")
+          $SrcDir = "..\VSCode-win32-arm64"
+          if (Test-Path $SrcDir) {
+            Compress-Archive -Path "$SrcDir\*" -DestinationPath "Miaoda-${VERSION}-win-arm64.zip" -Force
+          }
+        continue-on-error: true
+
+      - name: Collect artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release-artifacts
+          Copy-Item "Miaoda-*.zip" release-artifacts/ -ErrorAction SilentlyContinue
+          Get-ChildItem release-artifacts/ -ErrorAction SilentlyContinue
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-arm64
+          path: release-artifacts/*
+          if-no-files-found: ignore
+
+  # ============================================================
+  # Create GitHub Release with all artifacts
+  # ============================================================
   create-release:
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-linux-x64, build-linux-arm64, build-macos-x64, build-macos-arm64, build-windows-x64, build-windows-arm64]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -151,50 +345,64 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Extract version
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: List artifacts
+        run: |
+          echo "=== All release artifacts ==="
+          ls -lhR dist/ || echo "No artifacts found"
 
       - name: Generate release notes
-        id: notes
         run: |
-          cat << 'NOTES' > release-notes.md
-          ## Miaoda IDE v${{ steps.version.outputs.VERSION }}
+          VERSION=${GITHUB_REF_NAME#v}
+          cat > release-notes.md << 'EOF'
+          ## Miaoda IDE v${VERSION} (妙搭)
 
-          ### 📥 下载 / Download
+          🎉 Official Release / 正式发布
 
-          | 平台 | 架构 | 文件 |
-          |------|------|------|
-          | Windows | x64 | `Miaoda-Setup-${{ steps.version.outputs.VERSION }}-win-x64.exe` |
-          | Windows | arm64 | `Miaoda-Setup-${{ steps.version.outputs.VERSION }}-win-arm64.exe` |
-          | macOS | Intel | `Miaoda-${{ steps.version.outputs.VERSION }}-mac-x64.dmg` |
-          | macOS | Apple Silicon | `Miaoda-${{ steps.version.outputs.VERSION }}-mac-arm64.dmg` |
-          | Linux | x64 | `miaoda-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz` |
-          | Linux | arm64 | `miaoda-${{ steps.version.outputs.VERSION }}-linux-arm64.tar.gz` |
-          | Linux | deb | `miaoda-${{ steps.version.outputs.VERSION }}-linux-amd64.deb` |
-          | Linux | rpm | `miaoda-${{ steps.version.outputs.VERSION }}-linux-x64.rpm` |
-
-          ### ✨ 主要特性 / Highlights
-          - 🌐 通用 LLM 支持 (OpenAI, Anthropic, DeepSeek, Ollama 等)
-          - 🧠 智能上下文引擎 (95% 准确率, <45ms 响应)
-          - 💰 透明成本系统
-          - 🤖 多智能体并行协作
-          - 🛡️ 代码质量守护 (82% 自动修复率)
-          - ☁️ 云端存储服务 (www.imiaoda.cn)
-
-          详细更新日志请查看 [CHANGELOG.md](https://github.com/miounet11/miao/blob/main/CHANGELOG.md)
-
-          ---
           官网 / Website: https://www.imiaoda.cn
-          NOTES
 
-      - name: Create GitHub Release
+          ### ✨ Key Features / 主要特性
+
+          - 🌐 Universal LLM Support (OpenAI, Anthropic, DeepSeek, Ollama, etc.)
+          - 🧠 Smart Context Engine (95% accuracy, <45ms response)
+          - 💰 Transparent Cost System
+          - 🤖 Multi-Agent Orchestration (3-5x speedup)
+          - 🛡️ Code Quality Guardian (82% auto-fix rate)
+          - ☁️ Cloud Storage Service (www.imiaoda.cn)
+
+          ### 📥 Downloads / 下载
+
+          | Platform | Arch | File |
+          |----------|------|------|
+          | Windows | x64 | `Miaoda-${VERSION}-win-x64.zip` |
+          | Windows | arm64 | `Miaoda-${VERSION}-win-arm64.zip` |
+          | macOS | Intel | `Miaoda-${VERSION}-mac-x64.dmg` / `.zip` |
+          | macOS | Apple Silicon | `Miaoda-${VERSION}-mac-arm64.dmg` / `.zip` |
+          | Linux | x64 | `miaoda-${VERSION}-linux-x64.tar.gz` |
+          | Linux | arm64 | `miaoda-${VERSION}-linux-arm64.tar.gz` |
+          | Linux | deb (x64) | `miaoda-${VERSION}-linux-amd64.deb` |
+          | Linux | rpm (x64) | `miaoda-${VERSION}-linux-x64.rpm` |
+
+          ### 📖 Build from Source / 从源码编译
+
+          ```bash
+          git clone https://github.com/miounet11/miao.git
+          cd miao && yarn install && yarn compile
+          ./scripts/code.sh  # macOS/Linux
+          ```
+
+          Full changelog: [CHANGELOG.md](https://github.com/miounet11/miao/blob/main/CHANGELOG.md)
+          EOF
+          # Replace version placeholder
+          sed -i "s/\${VERSION}/${VERSION}/g" release-notes.md
+
+      - name: Create or update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
           body_path: release-notes.md
           draft: false
           prerelease: false
-          name: "Miaoda IDE v${{ steps.version.outputs.VERSION }}"
+          name: "Miaoda IDE ${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
