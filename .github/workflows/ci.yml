@@ -66,7 +66,7 @@ jobs:
         cd ../embedding-service && npm install && npm run compile
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v6
       with:
         name: extensions
         path: extensions/*/out/

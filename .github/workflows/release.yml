@@ -73,7 +73,7 @@ jobs:
           find .build/linux/deb -name "*.deb" -exec cp {} release-artifacts/miaoda-${VERSION}-linux-amd64.deb \; 2>/dev/null || true
           ls -lh release-artifacts/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: linux-x64
           path: release-artifacts/*
@@ -126,7 +126,7 @@ jobs:
           cp Miaoda-*.zip release-artifacts/ 2>/dev/null || true
           ls -lh release-artifacts/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: macos-x64
           path: release-artifacts/*
@@ -179,7 +179,7 @@ jobs:
           cp Miaoda-*.zip release-artifacts/ 2>/dev/null || true
           ls -lh release-artifacts/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: macos-arm64
           path: release-artifacts/*
@@ -240,7 +240,7 @@ jobs:
           }
           Get-ChildItem release-artifacts/ -ErrorAction SilentlyContinue
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: windows-x64
           path: release-artifacts/*
@@ -274,7 +274,7 @@ jobs:
           cd $OLDPWD
           ls -lh release-artifacts/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: source
           path: release-artifacts/*
